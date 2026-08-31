@@ -828,7 +828,7 @@ body:has(#game:not(.hidden)):before{
     min-width:25px;height:22px;padding:0 5px;margin-left:auto;border:1px solid #a88a55;border-radius:5px;
     background:linear-gradient(#2b251b,#13110d);color:#f4ddb0;font:800 9px/1 system-ui;box-shadow:inset 0 1px #ffffff13;
   }
-  .mobileFullscreenBtn:active{transform:translateY(1px)}
+  #syncBtn.mobileFullscreenBtn{margin-left:3px!important}.mobileFullscreenBtn:active{transform:translateY(1px)}
   .hsTurn{width:100%!important}
 
   /* L'overlay devient réellement interactif au tactile. */
@@ -925,7 +925,7 @@ body:has(#game:not(.hidden)):before{
   </section>
   <section id="game" class="hidden hsGame">
     <div class="hsTopbar">
-      <div class="hsTurn"><span id="turnBadge" class="badge turn">Tour</span><span class="badge">🃏 <b id="deckText">0</b></span><button id="fullscreenBtn" class="mobileFullscreenBtn" type="button" title="Plein écran" aria-label="Activer le plein écran" onclick="toggleGameFullscreen(event)">⛶</button></div>
+      <div class="hsTurn"><span id="turnBadge" class="badge turn">Tour</span><span class="badge">🃏 <b id="deckText">0</b></span><button id="syncBtn" class="mobileFullscreenBtn" type="button" style="margin-left:3px" title="Resynchroniser" aria-label="Resynchroniser la partie" onclick="forceGameSync(event)">↻</button><button id="fullscreenBtn" class="mobileFullscreenBtn" type="button" title="Plein écran" aria-label="Activer le plein écran" onclick="toggleGameFullscreen(event)">⛶</button></div>
       <div class="hsChaos"><span>RÈGLES</span><small>3 actions • Héros/Objet/Magie = 1 • Fléau = 2 • nouvelle main = 3</small></div>
     </div>
 
@@ -976,6 +976,11 @@ let peer=null, conns=[], hostConn=null, isHost=false, roomCode='', myId='', myNa
 let peerLibPromise=null, joinTimer=null, roomCreateTries=0;
 // V3.4 multi : reprise de session + snapshots versionnés pour éviter les désynchronisations mobiles.
 let guestReconnectTimer=null, syncLoopTimer=null, lastStateRev=-1, hostLastSeen=0, reconnectAttempts=0, hostFlowTimer=null;
+// V3.6 : transport fiable des actions (ACK + retry + déduplication côté hôte).
+let actionCounter=0;
+const pendingNetActions=new Map();
+const processedActionIds=new Set();
+const processedActionOrder=[];
 const BOT_NAMES=['Kael','Lyra','Rook','Varka','Nym','Torven','Vael'];
 const uid=()=>Math.random().toString(36).slice(2,9);
 const esc=s=>String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -994,6 +999,8 @@ function cleanupNetwork(){
   try{hostConn?.close()}catch(e){}
   for(const c of conns){try{c.close()}catch(e){}}
   try{peer?.destroy()}catch(e){}
+  for(const rec of pendingNetActions.values())if(rec.timer)clearTimeout(rec.timer);
+  pendingNetActions.clear();processedActionIds.clear();processedActionOrder.length=0;actionCounter=0;
   hostConn=null;peer=null;conns=[];lastStateRev=-1;hostLastSeen=0;reconnectAttempts=0;
 }
 function peerErrorText(err){
@@ -1075,6 +1082,7 @@ function connectToHost(resume=false){
     if(state)toast('Reconnecté — synchronisation…');
     else setJoinStatus('Connecté à l’hôte, synchronisation…');
     c.send({type:'join',id:myId,name:myName,resume:!!state,lastRev:lastStateRev});
+    setTimeout(resendPendingActions,120);
     if(!state){if(joinTimer)clearTimeout(joinTimer);joinTimer=setTimeout(()=>{if(!state){setJoinBusy(false);setJoinStatus('L’hôte ne répond pas. Vérifie le code ou réessaie.',true)}},10000)}
   });
   c.on('data',d=>{if(hostConn===c)handleClientData(d)});
@@ -1097,7 +1105,7 @@ function cloneStateSnapshot(){
 function currentStateRev(){return Math.max(0,Number(state&&state.syncRev)||0)}
 function sendStateTo(conn){
   if(!isHost||!state||!conn||!conn.open)return false;
-  try{conn.send({type:'state',rev:currentStateRev(),state:cloneStateSnapshot()});conn.lastStateSent=Date.now();return true}catch(e){console.error('State sync failed',e);return false}
+  try{conn.send({type:'state',rev:currentStateRev(),turnSeq:Number(state.turnSeq)||0,activePlayerId:active()?.id||null,state:cloneStateSnapshot()});conn.lastStateSent=Date.now();return true}catch(e){console.error('State sync failed',e);return false}
 }
 function requestStateSync(){
   if(isHost||!hostConn||!hostConn.open)return;
@@ -1115,11 +1123,12 @@ function startSyncLoop(){
       hostFlowTick();
     }else if(state){
       if(hostConn&&hostConn.open){
-        if(now-hostLastSeen>4200)requestStateSync();
-        if(now-hostLastSeen>8500){try{hostConn.close()}catch(e){};hostConn=null;scheduleGuestReconnect(100)}
+        // On réclame périodiquement l'état autoritaire, même sans erreur visible.
+        if(now-hostLastSeen>2200)requestStateSync();
+        if(now-hostLastSeen>6500){try{hostConn.close()}catch(e){};hostConn=null;scheduleGuestReconnect(100)}
       }else scheduleGuestReconnect(250);
     }
-  },2500);
+  },1200);
 }
 function bindHost(){
   startSyncLoop();
@@ -1148,9 +1157,21 @@ function handleHostData(conn,d){
   } else if(d.type==='syncReq')sendStateTo(conn);
   else if(d.type==='ack'){conn.lastAck=Math.max(conn.lastAck||-1,Number(d.rev)||0)}
   else if(d.type==='action'){
-    const pid=conn.playerId||d.playerId;
-    if(!pid)return;
+    const pid=conn.playerId||d.playerId;if(!pid)return;
+    const actionId=String(d.actionId||'');
+    // Un retry après micro-coupure ne doit JAMAIS rejouer deux fois une action.
+    if(actionId&&processedActionIds.has(actionId)){
+      try{if(conn.open)conn.send({type:'actionAck',actionId,rev:currentStateRev(),turnSeq:Number(state.turnSeq)||0,activePlayerId:active()?.id||null})}catch(e){}
+      sendStateTo(conn);return;
+    }
     processAction(pid,d.action);
+    if(actionId){
+      processedActionIds.add(actionId);processedActionOrder.push(actionId);
+      while(processedActionOrder.length>300){processedActionIds.delete(processedActionOrder.shift())}
+      try{if(conn.open)conn.send({type:'actionAck',actionId,rev:currentStateRev(),turnSeq:Number(state.turnSeq)||0,activePlayerId:active()?.id||null})}catch(e){}
+    }
+    // Snapshot immédiat vers l'émetteur, même si l'action a été refusée : il se recale.
+    sendStateTo(conn);
   }
 }
 function handleClientData(d){
@@ -1159,12 +1180,22 @@ function handleClientData(d){
     const rev=Math.max(0,Number(d.rev??d.state?.syncRev)||0);
     // Plusieurs connexions peuvent se croiser lors d'une reconnexion : jamais revenir à un état plus ancien.
     if(rev<lastStateRev)return;
-    if(state&&rev===lastStateRev){try{if(hostConn&&hostConn.open)hostConn.send({type:'ack',rev:lastStateRev,playerId:myId})}catch(e){};return}
-    state=d.state;state.syncRev=rev;lastStateRev=rev;
+    if(state&&rev===lastStateRev){
+      // Même révision ne veut pas dire interface saine : un téléphone peut avoir gardé un overlay/bouton bloqué.
+      try{if(hostConn&&hostConn.open)hostConn.send({type:'ack',rev:lastStateRev,playerId:myId})}catch(e){}
+      render();return
+    }
+    state=d.state;state.syncRev=rev;state.turnSeq=Number(state.turnSeq)||0;lastStateRev=rev;
     if(joinTimer){clearTimeout(joinTimer);joinTimer=null}
     setJoinBusy(false);setJoinStatus('Connecté ✅');
     try{if(hostConn&&hostConn.open)hostConn.send({type:'ack',rev:lastStateRev,playerId:myId})}catch(e){}
     if(state.started||state.winner)enterGame();else enterLobby();
+  }
+  if(d.type==='actionAck'){
+    const id=String(d.actionId||''),rec=pendingNetActions.get(id);
+    if(rec){if(rec.timer)clearTimeout(rec.timer);pendingNetActions.delete(id)}
+    // Si l'ACK annonce un tour plus récent que notre écran, demande immédiatement l'état complet.
+    if(state&&Number(d.turnSeq||0)>Number(state.turnSeq||0))requestStateSync();
   }
   if(d.type==='reject'){if(joinTimer)clearTimeout(joinTimer);setJoinBusy(false);if(state){toast(d.reason||'Reconnexion refusée')}else setJoinStatus(d.reason||'Connexion refusée',true)}
   if(d.type==='toast')toast(d.text)
@@ -1172,18 +1203,35 @@ function handleClientData(d){
 function broadcast(){
   if(!isHost||!state)return;
   state.syncRev=currentStateRev()+1;
-  const packet={type:'state',rev:state.syncRev,state:cloneStateSnapshot()};
+  const packet={type:'state',rev:state.syncRev,turnSeq:Number(state.turnSeq)||0,activePlayerId:active()?.id||null,state:cloneStateSnapshot()};
   conns=conns.filter(c=>c&&!c.destroyed);
   conns.forEach(c=>{try{if(c.open){c.send(packet);c.lastStateSent=Date.now()}}catch(e){console.error(e)}});
   render();scheduleHostFlow();if(state&&state.started)maybeBotTurn();
 }
-function sendAction(action){
-  if(!state)return;
-  if(isHost)processAction(myId,action);
-  else if(hostConn&&hostConn.open){try{hostConn.send({type:'action',playerId:myId,clientRev:lastStateRev,action})}catch(e){toast('Reconnexion…');scheduleGuestReconnect(100)}}
-  else{toast('Connexion à l’hôte perdue — reconnexion…');scheduleGuestReconnect(100)}
+function forceGameSync(e){if(e){e.preventDefault();e.stopPropagation()}if(!state)return;if(isHost){broadcast();toast('État renvoyé à tous ↻')}else{requestStateSync();resendPendingActions();toast('Resynchronisation… ↻')}}
+function nextActionId(){actionCounter++;return `${myId}-${Date.now().toString(36)}-${actionCounter.toString(36)}`}
+function transmitPendingAction(actionId){
+  const rec=pendingNetActions.get(actionId);if(!rec)return;
+  if(rec.timer){clearTimeout(rec.timer);rec.timer=null}
+  if(hostConn&&hostConn.open){
+    try{hostConn.send({type:'action',actionId,playerId:myId,clientRev:rec.baseRev,clientTurnSeq:rec.baseTurnSeq,action:rec.action});rec.tries++}
+    catch(e){scheduleGuestReconnect(100)}
+  }else scheduleGuestReconnect(100);
+  if(rec.tries>=10){pendingNetActions.delete(actionId);toast('Action non confirmée — resynchronisation…');requestStateSync();return}
+  rec.timer=setTimeout(()=>transmitPendingAction(actionId),Math.min(1800,550+rec.tries*170));
 }
+function sendAction(action){
+  if(!state||!action)return;
+  if(isHost){processAction(myId,action);return}
+  const actionId=nextActionId();
+  pendingNetActions.set(actionId,{actionId,action,baseRev:lastStateRev,baseTurnSeq:Number(state.turnSeq)||0,tries:0,timer:null,createdAt:Date.now()});
+  if(action.type==='endTurn')toast('Passage du tour…');
+  transmitPendingAction(actionId);
+}
+function resendPendingActions(){for(const id of pendingNetActions.keys())transmitPendingAction(id)}
 window.addEventListener('beforeunload',()=>{try{peer?.destroy()}catch(e){}});
+window.addEventListener('focus',()=>{if(!isHost&&state)requestStateSync()});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!isHost&&state){requestStateSync();setTimeout(resendPendingActions,120)}});
 setTimeout(()=>{const jc=document.getElementById('joinCode');if(jc)jc.addEventListener('keydown',e=>{if(e.key==='Enter')joinRoom()})},0);
 function newPlayer(id,name,host,bot=false){return {id,name,host,bot,hand:[],team:[],monsters:0,slain:[]};}
 function addBot(){if(!isHost||state.started)return;if(state.players.length>=6)return toast('Maximum 6 joueurs 🤖');const used=new Set(state.players.map(p=>p.name));const name=BOT_NAMES.find(n=>!used.has(n))||`Bot ${state.players.length}`;state.players.push(newPlayer('bot-'+uid(),name,false,true));log(`🤖 ${name} rejoint la bande.`);broadcast();}
@@ -1243,7 +1291,7 @@ const MONSTERS=[
 ];
 function mkDeck(){let d=[];const uniqueHeroes=[...new Map(HEROES.map(x=>[x[0],x])).values()];uniqueHeroes.forEach(x=>d.push({id:uid(),type:'hero',cardRole:'hero',name:x[0],emoji:x[1],class:x[2],desc:x[3],threshold:x[4],effect:x[5]}));for(let i=0;i<2;i++)ITEMS.forEach(x=>d.push({id:uid(),type:x[2],name:x[0],emoji:x[1],desc:x[3],effect:x[4]}));for(let i=0;i<3;i++)MAGIC.forEach(x=>d.push({id:uid(),type:'magic',name:x[0],emoji:x[1],desc:x[2],effect:x[3]}));for(let i=0;i<4;i++)MODIFIERS.forEach(x=>d.push({id:uid(),type:'modifier',name:x[0],emoji:x[1],desc:x[3],mode:x[4],value:x[5]}));for(let i=0;i<4;i++)CHALLENGES.forEach(x=>d.push({id:uid(),type:'challenge',name:x[0],emoji:x[1],desc:x[2],effect:x[3]}));return shuffle(d)}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-function initialState(){return {started:false,players:[],turn:0,actions:3,deck:mkDeck(),discard:[],monsterDeck:shuffle(MONSTERS.map(x=>({...x}))),monsters:[],log:['Bienvenue dans Bande de Branques — règles calées sur Here to Slay.'],usedHeroes:[],boosts:{},winner:null,pendingChoice:null,roll:null,fxSeq:0,fx:[],syncRev:0}}
+function initialState(){return {started:false,players:[],turn:0,actions:3,deck:mkDeck(),discard:[],monsterDeck:shuffle(MONSTERS.map(x=>({...x}))),monsters:[],log:['Bienvenue dans Bande de Branques — règles calées sur Here to Slay.'],usedHeroes:[],boosts:{},winner:null,pendingChoice:null,roll:null,fxSeq:0,fx:[],syncRev:0,turnSeq:0,turnStartedAt:0}}
 function newPlayer(id,name,host,bot=false){return {id,name,host,bot,hand:[],team:[],slain:[],leader:null,itemDrawUsed:false}}
 function log(t){state.log.unshift(t);state.log=state.log.slice(0,80)}
 function fxCardSnapshot(c){if(!c)return null;return {id:c.id,type:c.type,cardRole:c.cardRole,name:c.name,emoji:c.emoji,class:c.class,desc:c.desc,threshold:c.threshold,effect:c.effect}}
@@ -1292,7 +1340,7 @@ function playFxBatch(items){let delay=0;for(const item of items){setTimeout(()=>
 
 function draw(p,n=1){let drawn=0;for(let i=0;i<n;i++){if(!state.deck.length&&state.discard.length)state.deck=shuffle(state.discard.splice(0));const c=state.deck.pop();if(c){p.hand.push(c);drawn++}}if(drawn&&state.started)emitFx('draw',{playerId:p.id,count:drawn})}
 function chooseLeaders(){const pool=shuffle(LEADERS.map(x=>({...x,cardRole:'leader'})));state.players.forEach((p,i)=>p.leader=pool[i%pool.length])}
-function startGame(){if(!isHost)return;if(state.players.length<2){toast('Ajoute au moins un bot ou un joueur 😄');return}chooseLeaders();state.players.forEach(p=>draw(p,5));state.monsters=state.monsterDeck.splice(0,3);state.started=true;state.turn=0;state.actions=3;state.usedHeroes=[];log(`🔥 ${state.players[0].name} commence !`);broadcast();enterGame();maybeBotTurn()}
+function startGame(){if(!isHost)return;if(state.players.length<2){toast('Ajoute au moins un bot ou un joueur 😄');return}chooseLeaders();state.players.forEach(p=>draw(p,5));state.monsters=state.monsterDeck.splice(0,3);state.started=true;state.turn=0;state.turnSeq=1;state.turnStartedAt=Date.now();state.actions=3;state.usedHeroes=[];log(`🔥 ${state.players[0].name} commence !`);broadcast();enterGame();maybeBotTurn()}
 function active(){return state.players[state.turn]}
 function partyClasses(p){const s=new Set(p.team.map(h=>h.class));if(p.leader)s.add(p.leader.class);return s}
 function monsterSkillCount(p,skill){return (p.slain||[]).filter(m=>m.skill===skill).length+(p.leader&&p.leader.skill===skill?1:0)}
@@ -1535,7 +1583,7 @@ function scheduleHostFlow(){
  else if(r.stage==='awaitRoll'&&state.players.find(p=>p.id===r.currentRollerId)?.bot)delay=650;
  if(delay!==null)hostFlowTimer=setTimeout(()=>{hostFlowTimer=null;hostFlowTick()},delay)
 }
-function nextTurn(){state.turn=(state.turn+1)%state.players.length;state.actions=3;state.usedHeroes=[];active().itemDrawUsed=false;log(`➡️ Tour de ${active().name}.`);broadcast()}
+function nextTurn(){state.turn=(state.turn+1)%state.players.length;state.turnSeq=(Number(state.turnSeq)||0)+1;state.turnStartedAt=Date.now();state.actions=3;state.usedHeroes=[];active().itemDrawUsed=false;log(`➡️ Tour de ${active().name}.`);broadcast()}
 function maybeBotTurn(){if(!isHost||!state||!state.started||state.winner||state.pendingChoice||state.roll||botThinking)return;const p=active();if(!p||!p.bot)return;botThinking=true;setTimeout(()=>{botThinking=false;if(state.started&&!state.winner&&active().id===p.id)botStep(p)},500)}
 function botStep(p){if(active().id!==p.id)return;if(state.actions<=0){processAction(p.id,{type:'endTurn'});return}const hero=p.hand.find(c=>c.type==='hero'&&!partyClasses(p).has(c.class))||p.hand.find(c=>c.type==='hero');const magic=p.hand.find(c=>c.type==='magic');const item=p.hand.find(c=>c.type==='item'&&p.team.some(h=>!h.item));const cursed=p.hand.find(c=>c.type==='cursed'&&state.players.some(x=>x.id!==p.id&&x.team.some(h=>!h.item)));const usable=p.team.find(h=>!state.usedHeroes.includes(h.id));const target=state.monsters.find(m=>meetsRequirement(p,m));let a;if(state.actions>=2&&target&&Math.random()<.35)a={type:'attack',monsterId:target.id};else if(hero)a={type:'playCard',cardId:hero.id};else if(usable&&Math.random()<.5)a={type:'useHero',cardId:usable.id};else if(item)a={type:'playCard',cardId:item.id};else if(cursed)a={type:'playCard',cardId:cursed.id};else if(magic)a={type:'playCard',cardId:magic.id};else if(state.actions===3&&p.hand.length>=8)a={type:'discardHand'};else a={type:'draw'};processAction(p.id,a)}
 function declareWinner(p){state.winner=p.id;state.started=false;log(`👑 ${p.name} REMPORTE LA PARTIE !`);if(p.id===myId)setTimeout(()=>alert('Victoire ! 👑'),100);return true}

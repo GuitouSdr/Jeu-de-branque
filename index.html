@@ -967,6 +967,8 @@ body:has(#game:not(.hidden)):before{
 const diceFaces=['⚀','⚁','⚂','⚃','⚄','⚅'];
 let peer=null, conns=[], hostConn=null, isHost=false, roomCode='', myId='', myName='', state=null, botThinking=false;
 let peerLibPromise=null, joinTimer=null, roomCreateTries=0;
+// V3.4 multi : reprise de session + snapshots versionnés pour éviter les désynchronisations mobiles.
+let guestReconnectTimer=null, syncLoopTimer=null, lastStateRev=-1, hostLastSeen=0, reconnectAttempts=0;
 const BOT_NAMES=['Kael','Lyra','Rook','Varka','Nym','Torven','Vael'];
 const uid=()=>Math.random().toString(36).slice(2,9);
 const esc=s=>String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -979,9 +981,12 @@ function makeRoomCode(){return Math.random().toString(36).slice(2,8).toUpperCase
 function basePeerId(code){return 'branques-'+String(code||'').toLowerCase().replace(/[^a-z0-9]/g,'')}
 function cleanupNetwork(){
   if(joinTimer){clearTimeout(joinTimer);joinTimer=null}
+  if(guestReconnectTimer){clearTimeout(guestReconnectTimer);guestReconnectTimer=null}
+  if(syncLoopTimer){clearInterval(syncLoopTimer);syncLoopTimer=null}
   try{hostConn?.close()}catch(e){}
+  for(const c of conns){try{c.close()}catch(e){}}
   try{peer?.destroy()}catch(e){}
-  hostConn=null;peer=null;conns=[];
+  hostConn=null;peer=null;conns=[];lastStateRev=-1;hostLastSeen=0;reconnectAttempts=0;
 }
 function peerErrorText(err){
   const t=err&&err.type||'';
@@ -1037,55 +1042,138 @@ async function joinRoom(){
   if(roomCode.length<4){toast('Code invalide');return}
   setJoinBusy(true);setJoinStatus('Chargement du multijoueur…');
   try{await ensurePeerLib()}catch(e){console.error(e);setJoinBusy(false);setJoinStatus('PeerJS n’a pas pu charger. Vérifie ta connexion Internet.',true);return}
-  cleanupNetwork();isHost=false;state=null;myId=uid();setJoinStatus('Connexion à la salle '+roomCode+'…');
+  cleanupNetwork();isHost=false;state=null;myId=uid();lastStateRev=-1;hostLastSeen=Date.now();setJoinStatus('Connexion à la salle '+roomCode+'…');
   peer=makePeer();
-  peer.on('open',()=>{
-    setJoinStatus('Salle trouvée ? Tentative de liaison avec l’hôte…');
-    hostConn=peer.connect(basePeerId(roomCode),{reliable:true,serialization:'json',metadata:{playerId:myId,name:myName}});
-    hostConn.on('open',()=>{
-      setJoinStatus('Connecté à l’hôte, synchronisation…');
-      hostConn.send({type:'join',id:myId,name:myName});
-      joinTimer=setTimeout(()=>{setJoinBusy(false);setJoinStatus('L’hôte ne répond pas. Vérifie le code ou réessaie.',true)},10000);
-    });
-    hostConn.on('data',handleClientData);
-    hostConn.on('error',err=>{console.error('DataConnection error',err);if(joinTimer)clearTimeout(joinTimer);setJoinBusy(false);setJoinStatus('La liaison avec l’hôte a échoué.',true)});
-    hostConn.on('close',()=>{if(state)toast('Hôte déconnecté');else{setJoinBusy(false);setJoinStatus('Connexion fermée avant la synchronisation.',true)}});
+  peer.on('open',()=>{connectToHost(false);startSyncLoop()});
+  peer.on('disconnected',()=>{try{if(!peer.destroyed)peer.reconnect()}catch(e){};scheduleGuestReconnect(900)});
+  peer.on('error',err=>{
+    console.error('Peer join error',err);
+    if(joinTimer)clearTimeout(joinTimer);
+    if(!state){setJoinBusy(false);setJoinStatus(peerErrorText(err),true)}else{toast('Connexion instable — resynchronisation…');scheduleGuestReconnect(900)}
   });
-  peer.on('disconnected',()=>{try{if(!peer.destroyed)peer.reconnect()}catch(e){}});
-  peer.on('error',err=>{console.error('Peer join error',err);if(joinTimer)clearTimeout(joinTimer);setJoinBusy(false);setJoinStatus(peerErrorText(err),true)});
   joinTimer=setTimeout(()=>{if(!state){setJoinBusy(false);setJoinStatus('Délai dépassé. Vérifie que l’hôte est bien en ligne et que le code est correct.',true)}},15000);
 }
-function bindHost(){peer.on('connection',c=>{
-  conns.push(c);
-  c.on('data',d=>handleHostData(c,d));
-  c.on('error',err=>console.error('Guest connection error',err));
-  c.on('close',()=>{conns=conns.filter(x=>x!==c)});
-})}
+function connectToHost(resume=false){
+  if(isHost||!peer||peer.destroyed)return;
+  if(hostConn&&hostConn.open){requestStateSync();return}
+  if(!peer.open){scheduleGuestReconnect(900);return}
+  if(guestReconnectTimer){clearTimeout(guestReconnectTimer);guestReconnectTimer=null}
+  if(state)setJoinStatus('Reconnexion à la partie…');else setJoinStatus('Tentative de liaison avec l’hôte…');
+  const c=peer.connect(basePeerId(roomCode),{reliable:true,serialization:'json',metadata:{playerId:myId,name:myName,resume:!!state,lastRev:lastStateRev}});
+  hostConn=c;
+  c.on('open',()=>{
+    if(hostConn!==c)return;
+    reconnectAttempts=0;hostLastSeen=Date.now();
+    if(state)toast('Reconnecté — synchronisation…');
+    else setJoinStatus('Connecté à l’hôte, synchronisation…');
+    c.send({type:'join',id:myId,name:myName,resume:!!state,lastRev:lastStateRev});
+    if(!state){if(joinTimer)clearTimeout(joinTimer);joinTimer=setTimeout(()=>{if(!state){setJoinBusy(false);setJoinStatus('L’hôte ne répond pas. Vérifie le code ou réessaie.',true)}},10000)}
+  });
+  c.on('data',d=>{if(hostConn===c)handleClientData(d)});
+  c.on('error',err=>{console.error('DataConnection error',err);if(hostConn===c){if(!state){setJoinBusy(false);setJoinStatus('La liaison avec l’hôte a échoué.',true)}scheduleGuestReconnect(900)}});
+  c.on('close',()=>{if(hostConn===c){hostConn=null;if(state)toast('Micro-coupure — reconnexion…');else{setJoinBusy(false);setJoinStatus('Connexion interrompue, nouvelle tentative…',true)}scheduleGuestReconnect(700)}});
+}
+function scheduleGuestReconnect(delay=900){
+  if(isHost||!peer||peer.destroyed||guestReconnectTimer)return;
+  guestReconnectTimer=setTimeout(()=>{
+    guestReconnectTimer=null;reconnectAttempts++;
+    if(!peer||peer.destroyed)return;
+    if(!peer.open){try{peer.reconnect()}catch(e){};scheduleGuestReconnect(Math.min(2500,700+reconnectAttempts*250));return}
+    connectToHost(true);
+  },delay);
+}
+function cloneStateSnapshot(){
+  if(!state)return null;
+  try{return typeof structuredClone==='function'?structuredClone(state):JSON.parse(JSON.stringify(state))}catch(e){return JSON.parse(JSON.stringify(state))}
+}
+function currentStateRev(){return Math.max(0,Number(state&&state.syncRev)||0)}
+function sendStateTo(conn){
+  if(!isHost||!state||!conn||!conn.open)return false;
+  try{conn.send({type:'state',rev:currentStateRev(),state:cloneStateSnapshot()});conn.lastStateSent=Date.now();return true}catch(e){console.error('State sync failed',e);return false}
+}
+function requestStateSync(){
+  if(isHost||!hostConn||!hostConn.open)return;
+  try{hostConn.send({type:'syncReq',playerId:myId,lastRev:lastStateRev})}catch(e){scheduleGuestReconnect(500)}
+}
+function startSyncLoop(){
+  if(syncLoopTimer)clearInterval(syncLoopTimer);
+  syncLoopTimer=setInterval(()=>{
+    const now=Date.now();
+    if(isHost){
+      if(!state)return;
+      conns=conns.filter(c=>c&&!c.destroyed);
+      // Snapshot de sécurité : une perte de paquet ou un téléphone qui se réveille récupère toujours l'état courant.
+      for(const c of conns)if(c.open)sendStateTo(c);
+    }else if(state){
+      if(hostConn&&hostConn.open){
+        if(now-hostLastSeen>4200)requestStateSync();
+        if(now-hostLastSeen>8500){try{hostConn.close()}catch(e){};hostConn=null;scheduleGuestReconnect(100)}
+      }else scheduleGuestReconnect(250);
+    }
+  },2500);
+}
+function bindHost(){
+  startSyncLoop();
+  peer.on('connection',c=>{
+    conns.push(c);c.lastSeen=Date.now();c.lastAck=-1;
+    c.on('data',d=>handleHostData(c,d));
+    c.on('error',err=>console.error('Guest connection error',err));
+    c.on('close',()=>{conns=conns.filter(x=>x!==c)});
+  })
+}
 function enterLobby(){document.getElementById('home').classList.add('hidden');document.getElementById('lobby').classList.remove('hidden');document.getElementById('roomCode').textContent=roomCode;document.getElementById('hostBadge').textContent=isHost?'HÔTE':'JOUEUR';if(isHost){document.getElementById('startBtn').classList.remove('hidden');document.getElementById('botControls').classList.remove('hidden')}render();}
 function enterGame(){document.getElementById('home').classList.add('hidden');document.getElementById('lobby').classList.add('hidden');document.getElementById('game').classList.remove('hidden');render();}
 function handleHostData(conn,d){
-  if(!d||typeof d!=='object')return;
+  if(!d||typeof d!=='object')return;conn.lastSeen=Date.now();
   if(d.type==='join'){
     if(!state)return;
-    if(state.started){conn.send({type:'reject',reason:'Partie déjà commencée'});return}
-    if(state.players.length>=6){conn.send({type:'reject',reason:'Salle complète'});return}
-    if(!state.players.some(p=>p.id===d.id))state.players.push(newPlayer(d.id,String(d.name||'Joueur').slice(0,16),false));
-    conn.playerId=d.id;log(`${String(d.name||'Joueur').slice(0,16)} rejoint la bande.`);broadcast();
-  } else if(d.type==='action')processAction(d.playerId,d.action);
+    const existing=state.players.find(p=>p.id===d.id);
+    if(state.started&&!existing){conn.send({type:'reject',reason:'Partie déjà commencée'});return}
+    if(!existing&&state.players.length>=6){conn.send({type:'reject',reason:'Salle complète'});return}
+    if(!existing){state.players.push(newPlayer(d.id,String(d.name||'Joueur').slice(0,16),false));log(`${String(d.name||'Joueur').slice(0,16)} rejoint la bande.`)}
+    conn.playerId=d.id;
+    // Une reprise remplace l'ancienne DataConnection du même joueur pour éviter deux flux concurrents.
+    for(const old of [...conns])if(old!==conn&&old.playerId===d.id){try{old.close()}catch(e){}}
+    conns=conns.filter(x=>x===conn||x.playerId!==d.id);
+    if(existing){sendStateTo(conn)}else broadcast();
+  } else if(d.type==='syncReq')sendStateTo(conn);
+  else if(d.type==='ack'){conn.lastAck=Math.max(conn.lastAck||-1,Number(d.rev)||0)}
+  else if(d.type==='action'){
+    const pid=conn.playerId||d.playerId;
+    if(!pid)return;
+    processAction(pid,d.action);
+  }
 }
 function handleClientData(d){
-  if(!d||typeof d!=='object')return;
+  if(!d||typeof d!=='object')return;hostLastSeen=Date.now();
   if(d.type==='state'){
-    state=d.state;
+    const rev=Math.max(0,Number(d.rev??d.state?.syncRev)||0);
+    // Plusieurs connexions peuvent se croiser lors d'une reconnexion : jamais revenir à un état plus ancien.
+    if(rev<lastStateRev)return;
+    if(state&&rev===lastStateRev){try{if(hostConn&&hostConn.open)hostConn.send({type:'ack',rev:lastStateRev,playerId:myId})}catch(e){};return}
+    state=d.state;state.syncRev=rev;lastStateRev=rev;
     if(joinTimer){clearTimeout(joinTimer);joinTimer=null}
     setJoinBusy(false);setJoinStatus('Connecté ✅');
-    if(state.started)enterGame();else enterLobby();
+    try{if(hostConn&&hostConn.open)hostConn.send({type:'ack',rev:lastStateRev,playerId:myId})}catch(e){}
+    if(state.started||state.winner)enterGame();else enterLobby();
   }
-  if(d.type==='reject'){if(joinTimer)clearTimeout(joinTimer);setJoinBusy(false);setJoinStatus(d.reason||'Connexion refusée',true);toast(d.reason||'Connexion refusée')}
+  if(d.type==='reject'){if(joinTimer)clearTimeout(joinTimer);setJoinBusy(false);if(state){toast(d.reason||'Reconnexion refusée')}else setJoinStatus(d.reason||'Connexion refusée',true)}
   if(d.type==='toast')toast(d.text)
 }
-function broadcast(){if(!isHost)return;const msg={type:'state',state};conns.forEach(c=>{try{if(c.open)c.send(msg)}catch(e){console.error(e)}});render();if(state&&state.started)maybeBotTurn();}
-function sendAction(action){if(!state)return;if(isHost)processAction(myId,action);else if(hostConn&&hostConn.open)hostConn.send({type:'action',playerId:myId,action});else toast('Connexion à l’hôte perdue')}
+function broadcast(){
+  if(!isHost||!state)return;
+  state.syncRev=currentStateRev()+1;
+  const packet={type:'state',rev:state.syncRev,state:cloneStateSnapshot()};
+  conns=conns.filter(c=>c&&!c.destroyed);
+  conns.forEach(c=>{try{if(c.open){c.send(packet);c.lastStateSent=Date.now()}}catch(e){console.error(e)}});
+  render();if(state&&state.started)maybeBotTurn();
+}
+function sendAction(action){
+  if(!state)return;
+  if(isHost)processAction(myId,action);
+  else if(hostConn&&hostConn.open){try{hostConn.send({type:'action',playerId:myId,clientRev:lastStateRev,action})}catch(e){toast('Reconnexion…');scheduleGuestReconnect(100)}}
+  else{toast('Connexion à l’hôte perdue — reconnexion…');scheduleGuestReconnect(100)}
+}
 window.addEventListener('beforeunload',()=>{try{peer?.destroy()}catch(e){}});
 setTimeout(()=>{const jc=document.getElementById('joinCode');if(jc)jc.addEventListener('keydown',e=>{if(e.key==='Enter')joinRoom()})},0);
 function newPlayer(id,name,host,bot=false){return {id,name,host,bot,hand:[],team:[],monsters:0,slain:[]};}
@@ -1146,7 +1234,7 @@ const MONSTERS=[
 ];
 function mkDeck(){let d=[];const uniqueHeroes=[...new Map(HEROES.map(x=>[x[0],x])).values()];uniqueHeroes.forEach(x=>d.push({id:uid(),type:'hero',cardRole:'hero',name:x[0],emoji:x[1],class:x[2],desc:x[3],threshold:x[4],effect:x[5]}));for(let i=0;i<2;i++)ITEMS.forEach(x=>d.push({id:uid(),type:x[2],name:x[0],emoji:x[1],desc:x[3],effect:x[4]}));for(let i=0;i<3;i++)MAGIC.forEach(x=>d.push({id:uid(),type:'magic',name:x[0],emoji:x[1],desc:x[2],effect:x[3]}));for(let i=0;i<4;i++)MODIFIERS.forEach(x=>d.push({id:uid(),type:'modifier',name:x[0],emoji:x[1],desc:x[3],mode:x[4],value:x[5]}));for(let i=0;i<4;i++)CHALLENGES.forEach(x=>d.push({id:uid(),type:'challenge',name:x[0],emoji:x[1],desc:x[2],effect:x[3]}));return shuffle(d)}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-function initialState(){return {started:false,players:[],turn:0,actions:3,deck:mkDeck(),discard:[],monsterDeck:shuffle(MONSTERS.map(x=>({...x}))),monsters:[],log:['Bienvenue dans Bande de Branques — règles calées sur Here to Slay.'],usedHeroes:[],boosts:{},winner:null,pendingChoice:null,fxSeq:0,fx:[]}}
+function initialState(){return {started:false,players:[],turn:0,actions:3,deck:mkDeck(),discard:[],monsterDeck:shuffle(MONSTERS.map(x=>({...x}))),monsters:[],log:['Bienvenue dans Bande de Branques — règles calées sur Here to Slay.'],usedHeroes:[],boosts:{},winner:null,pendingChoice:null,fxSeq:0,fx:[],syncRev:0}}
 function newPlayer(id,name,host,bot=false){return {id,name,host,bot,hand:[],team:[],slain:[],leader:null,itemDrawUsed:false}}
 function log(t){state.log.unshift(t);state.log=state.log.slice(0,80)}
 function fxCardSnapshot(c){if(!c)return null;return {id:c.id,type:c.type,cardRole:c.cardRole,name:c.name,emoji:c.emoji,class:c.class,desc:c.desc,threshold:c.threshold,effect:c.effect}}
@@ -1275,7 +1363,7 @@ function resolvePendingChoice(pid,a){
    else if(purpose==='steal'){const x=getHeroRef(keys[0]);if(x&&x.player.id!==actor.id){emitFx('heroMove',{fromOwnerId:x.player.id,toOwnerId:actor.id,heroId:x.hero.id,card:fxCardSnapshot(x.hero),mode:'steal'});x.player.team=x.player.team.filter(h=>h.id!==x.hero.id);actor.team.push(x.hero);log(`🦝 ${actor.name} VOLE ${x.hero.name}.`);if(actor.leader&&actor.leader.skill==='stealDraw')draw(actor,1)}}
    else if(purpose==='destroyItem'){const x=getHeroRef(keys[0]);if(x&&x.hero.item){const name=x.hero.item.name;emitFx('itemBreak',{ownerId:x.player.id,heroId:x.hero.id,itemName:name});state.discard.push(x.hero.item);delete x.hero.item;log(`💥 ${name} est DÉTRUIT.`)}}
    else if(purpose==='swapOwn'){const x=getHeroRef(keys[0]);if(x&&x.player.id===actor.id)requestHeroChoice(actor,'swapEnemy',1,'Choisis le Héros adverse à recevoir',{ownHeroId:x.hero.id})}
-   else if(purpose==='swapEnemy'){const x=getHeroRef(keys[0]),own=actor.team.find(h=>h.id===c.context.ownHeroId);if(x&&own&&x.player.id!==actor.id){emitFx('heroSwap',{aOwnerId:actor.id,aHeroId:own.id,bOwnerId:x.player.id,bHeroId:x.hero.id,aCard:fxCardSnapshot(own),bCard:fxCardSnapshot(x.hero)});const ai=actor.team.indexOf(own),bi=x.player.team.indexOf(x.hero);actor.team[ai]=x.hero;x.player.team[bi]=own;log(`🔄 ${actor.name} échange ${own.name} avec ${x.hero.name}.`)}}
+   else if(purpose==='swapEnemy'){const x=getHeroRef(keys[0]),own=actor.team.find(h=>h.id===c.context.ownHeroId);if(x&&own&&x.player.id!==actor.id){const other=x.hero,otherPlayer=x.player;emitFx('heroSwap',{aOwnerId:actor.id,aHeroId:own.id,bOwnerId:otherPlayer.id,bHeroId:other.id,aCard:fxCardSnapshot(own),bCard:fxCardSnapshot(other)});const ai=actor.team.findIndex(h=>h.id===own.id),bi=otherPlayer.team.findIndex(h=>h.id===other.id);if(ai>=0&&bi>=0){actor.team[ai]=other;otherPlayer.team[bi]=own;log(`🔄 ${actor.name} échange ${own.name} avec ${other.name}.`)}}}
  }
 }
 function roll2(){return 2+Math.floor(Math.random()*6)+Math.floor(Math.random()*6)}

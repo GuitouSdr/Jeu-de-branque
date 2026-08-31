@@ -800,6 +800,22 @@ body:has(#game:not(.hidden)):before{
   .targetingBar,.selectedBar{bottom:95px!important}
 }
 
+
+
+/* === V3.1 — même rendu mobile pour l’hôte et le joueur qui rejoint === */
+@media (orientation:landscape) and (max-width:1024px) and (max-height:560px){
+  /* Hors de ton tour, la main reste visuellement identique : elle est seulement non interactive. */
+  .hsHand .hsCard.disabled{
+    filter:none!important;
+    opacity:1!important;
+  }
+  /* Les commandes inactives restent lisibles sans donner l’impression que l’UI est cassée. */
+  #drawBtn:disabled,#redrawBtn:disabled,#endBtn:disabled{
+    opacity:.72!important;
+    filter:saturate(.78) brightness(.86)!important;
+  }
+}
+
 </style>
 </head>
 <body>

@@ -893,6 +893,12 @@ body:has(#game:not(.hidden)):before{
   .hsTable .mobilePreviewTap,.enemyCards .mobilePreviewTap{touch-action:manipulation!important}
 }
 
+
+
+/* === V3.5 — lancer de dés interactif + réactions synchronisées === */
+.rollOverlay{position:fixed;inset:0;z-index:520;background:#020403c9;backdrop-filter:blur(5px);display:grid;place-items:center;padding:12px;color:#f6e8c7}.rollOverlay.hidden{display:none!important}.rollPanel{width:min(880px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;border:2px solid #b89454;border-radius:22px;background:radial-gradient(circle at 50% 0,#4b39255c,transparent 38%),linear-gradient(180deg,#211b14f7,#0c0e0efb 72%);box-shadow:0 25px 90px #000f,inset 0 0 0 1px #ffffff10;padding:14px 16px}.rollEyebrow{text-align:center;font-size:9px;font-weight:1000;letter-spacing:3px;color:#c8aa6c;text-transform:uppercase}.rollTitle{text-align:center;margin:5px 0 3px;font:700 clamp(20px,3vw,30px) Georgia,serif;color:#ffe2a6}.rollSubtitle{text-align:center;font-size:11px;color:#bfb39a;min-height:16px}.rollStage{display:grid;place-items:center;gap:10px;margin:12px auto}.dicePad{width:min(560px,100%);min-height:190px;border:1px solid #7f6947;border-radius:20px;background:radial-gradient(circle,#284437 0,#172820 45%,#0c1311 100%);box-shadow:inset 0 0 45px #000b,0 10px 30px #0007;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;user-select:none;-webkit-user-select:none;touch-action:none}.dicePad.canRoll{cursor:pointer;border-color:#e0b660;box-shadow:inset 0 0 45px #000b,0 0 0 2px #d7ad4b2d,0 10px 30px #0007}.dicePair{display:flex;align-items:center;justify-content:center;gap:22px;min-height:96px}.syncDie{width:88px;height:88px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(145deg,#fff9e8,#d5cab3);border:4px solid #8f7956;color:#15130f;font-size:63px;line-height:1;box-shadow:0 8px 0 #6c604d,0 14px 24px #0009,inset 0 0 0 2px #fff}.syncDie.rolling{font-size:52px;animation:diceTumble .17s linear infinite;filter:brightness(1.1)}@keyframes diceTumble{0%{transform:translate(-6px,-5px) rotate(-12deg)}25%{transform:translate(8px,2px) rotate(16deg)}50%{transform:translate(-2px,8px) rotate(34deg)}75%{transform:translate(-9px,0) rotate(-18deg)}100%{transform:translate(-6px,-5px) rotate(-12deg)}}.rollPrompt{font-size:12px;font-weight:900;text-align:center;color:#f2ddb0}.rollPrompt strong{color:#ffd36b}.swipeHint{font-size:9px;letter-spacing:1.1px;color:#9e927c;text-align:center;text-transform:uppercase}.rollMainButton{min-width:210px;padding:11px 18px!important;border-radius:12px!important}.rollSides{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;width:min(700px,100%);margin:10px auto}.rollSide{border:1px solid #66563c;border-radius:14px;background:#111513e8;padding:10px;text-align:center;min-width:0}.rollSide.active{border-color:#d8ad58;box-shadow:0 0 0 2px #d8ad5828}.rollSide b{display:block;font:700 15px Georgia,serif;color:#f0d6a1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rollSide small{display:block;font-size:9px;color:#9f947e;margin-top:2px}.rollSideTotal{font-size:28px;font-weight:1000;margin-top:5px;color:#fff0be}.rawCalc{font-size:10px;color:#bdb09a}.reactionBox{width:min(760px,100%);margin:10px auto 0;border-top:1px solid #665239;padding-top:10px}.reactionHead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.reactionHead b{font:700 16px Georgia,serif;color:#f2d8a5}.reactionHead span{font-size:10px;color:#bbae93}.reactionCards{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:8px;margin-top:9px}.reactionCard{border:1px solid #64583f;border-radius:12px;background:#151713;padding:8px;min-width:0}.reactionCard strong{display:block;font-size:11px;color:#f2dfb7}.reactionCard small{display:block;font-size:8px;color:#aaa087;margin:2px 0 7px}.reactionActions{display:flex;gap:5px;flex-wrap:wrap}.reactionActions button{flex:1 1 auto;min-width:70px;padding:7px 6px!important;font-size:9px!important;border-radius:8px!important}.reactionLog{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}.reactionChip{font-size:9px;border:1px solid #5d513b;border-radius:999px;padding:4px 7px;background:#0c0f0d;color:#d6c8a9}.reactionChip.plus{border-color:#4d8a5f;color:#aef0be}.reactionChip.minus{border-color:#984c43;color:#ffb2a8}.rollFooter{display:flex;justify-content:center;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}.rollCountdown{font-size:10px;color:#a99e88;min-width:86px;text-align:center}.challengeCardView{display:grid;grid-template-columns:92px minmax(0,1fr);gap:12px;align-items:center;width:min(600px,100%);margin:12px auto;padding:10px;border:1px solid #715b3c;border-radius:14px;background:#11120ff0}.challengeCardArt{width:92px;height:118px;border-radius:10px;background-size:cover;background-position:center;border:2px solid #9a7646}.challengeCardView h3{margin:0 0 5px;font:700 20px Georgia,serif;color:#f8dfac}.challengeCardView p{margin:0;font-size:11px;line-height:1.35;color:#cfc3a9}.challengeActions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.challengeActions button{padding:9px 11px!important;font-size:10px!important}.finalResult{font:900 clamp(26px,5vw,46px) Georgia,serif;color:#ffe18a;text-align:center;text-shadow:0 4px 18px #000}.finalOutcome{text-align:center;font-size:14px;font-weight:1000;color:#e8ddc5}.finalOutcome.good{color:#8ff0a9}.finalOutcome.bad{color:#ff9c8d}.finalOutcome.neutral{color:#d9c795}.rollWatching{padding:8px 12px;border-radius:999px;border:1px solid #5d503a;background:#0b0e0d;color:#c4b89e;font-size:10px}.rollOverlay button:disabled{opacity:.42}.rollOverlay .hidden{display:none!important}
+@media(max-width:1024px) and (orientation:landscape) and (max-height:560px){.rollOverlay{padding:5px}.rollPanel{width:calc(100vw - 10px);max-height:calc(100dvh - 10px);border-radius:14px;padding:7px 10px}.rollEyebrow{font-size:7px;letter-spacing:2px}.rollTitle{font-size:18px;margin:2px 0}.rollSubtitle{font-size:9px;min-height:12px}.rollStage{margin:5px auto;gap:4px}.dicePad{min-height:116px;width:min(500px,76vw);padding:6px 10px;gap:5px;border-radius:13px}.dicePair{min-height:64px;gap:15px}.syncDie{width:59px;height:59px;border-radius:12px;font-size:43px;border-width:3px;box-shadow:0 5px 0 #6c604d,0 8px 14px #0009}.syncDie.rolling{font-size:36px}.rollPrompt{font-size:9px}.swipeHint{font-size:7px}.rollMainButton{min-width:170px;padding:7px 12px!important;font-size:9px!important}.rollSides{margin:4px auto;gap:6px}.rollSide{padding:5px 7px;border-radius:9px}.rollSide b{font-size:11px}.rollSide small{font-size:7px}.rollSideTotal{font-size:20px;margin-top:2px}.rawCalc{font-size:7px}.reactionBox{margin-top:4px;padding-top:5px}.reactionHead b{font-size:12px}.reactionHead span{font-size:7px}.reactionCards{grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:5px;margin-top:4px;max-height:100px;overflow:auto}.reactionCard{padding:5px;border-radius:8px}.reactionCard strong{font-size:9px}.reactionCard small{font-size:7px;margin:1px 0 4px}.reactionActions button{min-width:58px;padding:4px!important;font-size:7px!important}.reactionLog{margin-top:4px}.reactionChip{font-size:7px;padding:2px 5px}.rollFooter{margin-top:4px}.rollFooter button{padding:6px 10px!important;font-size:8px!important}.rollCountdown{font-size:7px}.challengeCardView{grid-template-columns:62px minmax(0,1fr);gap:7px;margin:5px auto;padding:6px}.challengeCardArt{width:62px;height:78px}.challengeCardView h3{font-size:14px;margin-bottom:2px}.challengeCardView p{font-size:8px}.challengeActions{margin-top:4px}.challengeActions button{padding:5px 7px!important;font-size:7px!important}.finalResult{font-size:30px}.finalOutcome{font-size:10px}}
+
 </style>
 </head>
 <body>
@@ -961,6 +967,7 @@ body:has(#game:not(.hidden)):before{
 </div>
 <div id="rotatePhone" aria-live="polite"><div class="rotateIcon">📱</div><b>Tourne ton téléphone</b><span>La partie est optimisée en mode paysage pour garder le tapis, les cartes et ta main visibles en même temps.</span></div>
 <div id="fxLayer" class="fxLayer"></div>
+<div id="rollOverlay" class="rollOverlay hidden" aria-live="polite"><div id="rollPanel" class="rollPanel"></div></div>
 <div id="opponentCardPreview" class="opponentCardPreview hidden" onclick="closeCardPreview(event)"></div>
 <div id="toast" class="toast hidden"></div><div id="modal" class="modal hidden"><div class="modalBox" id="modalBox"></div></div>
 <script>
@@ -968,7 +975,7 @@ const diceFaces=['⚀','⚁','⚂','⚃','⚄','⚅'];
 let peer=null, conns=[], hostConn=null, isHost=false, roomCode='', myId='', myName='', state=null, botThinking=false;
 let peerLibPromise=null, joinTimer=null, roomCreateTries=0;
 // V3.4 multi : reprise de session + snapshots versionnés pour éviter les désynchronisations mobiles.
-let guestReconnectTimer=null, syncLoopTimer=null, lastStateRev=-1, hostLastSeen=0, reconnectAttempts=0;
+let guestReconnectTimer=null, syncLoopTimer=null, lastStateRev=-1, hostLastSeen=0, reconnectAttempts=0, hostFlowTimer=null;
 const BOT_NAMES=['Kael','Lyra','Rook','Varka','Nym','Torven','Vael'];
 const uid=()=>Math.random().toString(36).slice(2,9);
 const esc=s=>String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -983,6 +990,7 @@ function cleanupNetwork(){
   if(joinTimer){clearTimeout(joinTimer);joinTimer=null}
   if(guestReconnectTimer){clearTimeout(guestReconnectTimer);guestReconnectTimer=null}
   if(syncLoopTimer){clearInterval(syncLoopTimer);syncLoopTimer=null}
+  if(hostFlowTimer){clearTimeout(hostFlowTimer);hostFlowTimer=null}
   try{hostConn?.close()}catch(e){}
   for(const c of conns){try{c.close()}catch(e){}}
   try{peer?.destroy()}catch(e){}
@@ -1104,6 +1112,7 @@ function startSyncLoop(){
       conns=conns.filter(c=>c&&!c.destroyed);
       // Snapshot de sécurité : une perte de paquet ou un téléphone qui se réveille récupère toujours l'état courant.
       for(const c of conns)if(c.open)sendStateTo(c);
+      hostFlowTick();
     }else if(state){
       if(hostConn&&hostConn.open){
         if(now-hostLastSeen>4200)requestStateSync();
@@ -1166,7 +1175,7 @@ function broadcast(){
   const packet={type:'state',rev:state.syncRev,state:cloneStateSnapshot()};
   conns=conns.filter(c=>c&&!c.destroyed);
   conns.forEach(c=>{try{if(c.open){c.send(packet);c.lastStateSent=Date.now()}}catch(e){console.error(e)}});
-  render();if(state&&state.started)maybeBotTurn();
+  render();scheduleHostFlow();if(state&&state.started)maybeBotTurn();
 }
 function sendAction(action){
   if(!state)return;
@@ -1234,7 +1243,7 @@ const MONSTERS=[
 ];
 function mkDeck(){let d=[];const uniqueHeroes=[...new Map(HEROES.map(x=>[x[0],x])).values()];uniqueHeroes.forEach(x=>d.push({id:uid(),type:'hero',cardRole:'hero',name:x[0],emoji:x[1],class:x[2],desc:x[3],threshold:x[4],effect:x[5]}));for(let i=0;i<2;i++)ITEMS.forEach(x=>d.push({id:uid(),type:x[2],name:x[0],emoji:x[1],desc:x[3],effect:x[4]}));for(let i=0;i<3;i++)MAGIC.forEach(x=>d.push({id:uid(),type:'magic',name:x[0],emoji:x[1],desc:x[2],effect:x[3]}));for(let i=0;i<4;i++)MODIFIERS.forEach(x=>d.push({id:uid(),type:'modifier',name:x[0],emoji:x[1],desc:x[3],mode:x[4],value:x[5]}));for(let i=0;i<4;i++)CHALLENGES.forEach(x=>d.push({id:uid(),type:'challenge',name:x[0],emoji:x[1],desc:x[2],effect:x[3]}));return shuffle(d)}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-function initialState(){return {started:false,players:[],turn:0,actions:3,deck:mkDeck(),discard:[],monsterDeck:shuffle(MONSTERS.map(x=>({...x}))),monsters:[],log:['Bienvenue dans Bande de Branques — règles calées sur Here to Slay.'],usedHeroes:[],boosts:{},winner:null,pendingChoice:null,fxSeq:0,fx:[],syncRev:0}}
+function initialState(){return {started:false,players:[],turn:0,actions:3,deck:mkDeck(),discard:[],monsterDeck:shuffle(MONSTERS.map(x=>({...x}))),monsters:[],log:['Bienvenue dans Bande de Branques — règles calées sur Here to Slay.'],usedHeroes:[],boosts:{},winner:null,pendingChoice:null,roll:null,fxSeq:0,fx:[],syncRev:0}}
 function newPlayer(id,name,host,bot=false){return {id,name,host,bot,hand:[],team:[],slain:[],leader:null,itemDrawUsed:false}}
 function log(t){state.log.unshift(t);state.log=state.log.slice(0,80)}
 function fxCardSnapshot(c){if(!c)return null;return {id:c.id,type:c.type,cardRole:c.cardRole,name:c.name,emoji:c.emoji,class:c.class,desc:c.desc,threshold:c.threshold,effect:c.effect}}
@@ -1291,6 +1300,11 @@ function itemBonus(h){if(!h.item)return 0;if(h.item.effect==='heroItem2')return 
 function processAction(pid,a){
  if(!state.started||state.winner)return;
  const p=state.players.find(x=>x.id===pid);if(!p)return;
+ // Une phase de dés / Défi est autoritaire : seules ses réactions sont acceptées tant qu'elle n'est pas résolue.
+ if(state.roll){
+   if(handleRollAction(pid,a)){checkWin();broadcast();return}
+   return notify(pid,'Le lancer en cours doit être terminé avant de continuer 🎲');
+ }
  if(state.pendingChoice){
    if(a.type==='resolveChoice'){resolvePendingChoice(pid,a);checkWin();broadcast();return}
    return notify(pid,state.pendingChoice.chooserId===pid?'Termine ton choix avant de continuer 🙂':'Un joueur doit terminer un choix avant la suite.');
@@ -1305,19 +1319,52 @@ function processAction(pid,a){
  checkWin();broadcast()
 }
 function canChallengeCard(c){return c&&['hero','item','cursed','magic'].includes(c.type)}
-function botChallenge(actor,card){const me=state.players.find(x=>x.id===myId);if(isHost&&actor.id!==myId&&me){const hi=me.hand.findIndex(c=>c.type==='challenge');if(hi>=0&&confirm(`⚔️ ${actor.name} veut jouer ${card.name}. Utiliser ton DÉFI ?`)){const ch=me.hand.splice(hi,1)[0];state.discard.push(ch);const ar=roll2(),br=roll2();log(`⚔️ ${me.name} DÉFIE ${actor.name} : ${br} contre ${ar}.`);if(br>=ar)return true;return false}}const bots=state.players.filter(x=>x.id!==actor.id&&x.bot);for(const b of bots){const i=b.hand.findIndex(c=>c.type==='challenge');if(i>=0&&Math.random()<0.22){const ch=b.hand.splice(i,1)[0];state.discard.push(ch);const ar=roll2(),br=roll2();log(`⚔️ ${b.name} DÉFIE ${actor.name} : ${br} contre ${ar}.`);if(br>=ar)return true;return false}}return false}
 function heroRef(playerId,heroId){return `${playerId}~${heroId}`}
 function parseHeroRef(key){const i=String(key).indexOf('~');return i<0?null:{playerId:String(key).slice(0,i),heroId:String(key).slice(i+1)}}
 function getHeroRef(key){const r=parseHeroRef(key);if(!r)return null;const player=state.players.find(x=>x.id===r.playerId);const hero=player&&player.team.find(x=>x.id===r.heroId);return player&&hero?{player,hero}:null}
 function itemTargetChoices(p,c){const out=[];if(c.type==='cursed')state.players.filter(x=>x.id!==p.id).forEach(pl=>pl.team.filter(h=>!h.item).forEach(h=>out.push(heroRef(pl.id,h.id))));else p.team.filter(h=>!h.item).forEach(h=>out.push(heroRef(p.id,h.id)));return out}
 function playCard(p,id,targetPlayerId,targetHeroId){
- if(state.actions<1)return;const i=p.hand.findIndex(c=>c.id===id);if(i<0)return;const c=p.hand[i];if(['modifier','challenge'].includes(c.type))return notify(p.id,'Cette carte se joue en réaction, pas comme une action.');
+ if(state.actions<1)return;
+ const i=p.hand.findIndex(c=>c.id===id);if(i<0)return;const c=p.hand[i];
+ if(['modifier','challenge'].includes(c.type))return notify(p.id,'Cette carte se joue en réaction, pas comme une action.');
  if((c.type==='item'||c.type==='cursed')&&!targetHeroId){const candidates=itemTargetChoices(p,c);if(!candidates.length)return notify(p.id,'Aucun Héros disponible pour cet Objet.');return setPendingChoice({chooserId:p.id,kind:'itemTarget',title:c.type==='cursed'?'Choisis le Héros adverse à maudire':'Choisis le Héros à équiper',count:1,candidates,context:{cardId:c.id}})}
- if(canChallengeCard(c)&&botChallenge(p,c)){emitFx('discard',{playerId:p.id,cardId:c.id,card:fxCardSnapshot(c)});p.hand.splice(i,1);state.discard.push(c);state.actions--;log(`❌ La carte ${c.name} est annulée par le Défi.`);return}
- state.actions--;p.hand.splice(i,1);
- if(c.type==='hero'){emitFx('playHero',{playerId:p.id,cardId:c.id,card:fxCardSnapshot(c)});p.team.push(c);log(`${p.name} pose ${c.name}.`);useHero(p,c.id,true)}
- else if(c.type==='item'||c.type==='cursed'){const target=findItemTarget(p,c,targetPlayerId,targetHeroId);if(!target){p.hand.push(c);state.actions++;return notify(p.id,'Cette cible n’est plus disponible.');}emitFx('equip',{playerId:p.id,cardId:c.id,card:fxCardSnapshot(c),targetPlayerId:target.player.id,targetHeroId:target.hero.id,cursed:c.type==='cursed'});target.hero.item=c;log(`${p.name} équipe ${target.hero.name} avec ${c.name}.`);if((p.leader&&p.leader.skill==='itemDraw')&&!p.itemDrawUsed){draw(p,1);p.itemDrawUsed=true}}
- else if(c.type==='magic'){emitFx('playMagic',{playerId:p.id,cardId:c.id,card:fxCardSnapshot(c)});state.discard.push(c);log(`${p.name} joue la Magie ${c.name}.`);applyEffect(p,c.effect);if(monsterSkillCount(p,'magicDraw'))draw(p,monsterSkillCount(p,'magicDraw'))}
+ // Comme sur table, l'action est dépensée dès que la carte est annoncée. Un Défi perdu ne rembourse pas l'action.
+ state.actions--;
+ if(canChallengeCard(c)){beginChallengeWindow(p,c,targetPlayerId,targetHeroId);return}
+ resolveCardPlay(p,c,targetPlayerId,targetHeroId)
+}
+function resolveCardPlay(p,c,targetPlayerId,targetHeroId){
+ if(!p||!c)return false;const i=p.hand.findIndex(x=>x.id===c.id);if(i<0)return false;
+ if(c.type==='item'||c.type==='cursed'){
+   const target=findItemTarget(p,c,targetPlayerId,targetHeroId);
+   if(!target){state.actions++;return notify(p.id,'Cette cible n’est plus disponible.');}
+   p.hand.splice(i,1);emitFx('equip',{playerId:p.id,cardId:c.id,card:fxCardSnapshot(c),targetPlayerId:target.player.id,targetHeroId:target.hero.id,cursed:c.type==='cursed'});target.hero.item=c;log(`${p.name} équipe ${target.hero.name} avec ${c.name}.`);if((p.leader&&p.leader.skill==='itemDraw')&&!p.itemDrawUsed){draw(p,1);p.itemDrawUsed=true}return true
+ }
+ p.hand.splice(i,1);
+ if(c.type==='hero'){emitFx('playHero',{playerId:p.id,cardId:c.id,card:fxCardSnapshot(c)});p.team.push(c);log(`${p.name} pose ${c.name}.`);useHero(p,c.id,true);return true}
+ if(c.type==='magic'){emitFx('playMagic',{playerId:p.id,cardId:c.id,card:fxCardSnapshot(c)});state.discard.push(c);log(`${p.name} joue la Magie ${c.name}.`);applyEffect(p,c.effect);if(monsterSkillCount(p,'magicDraw'))draw(p,monsterSkillCount(p,'magicDraw'));return true}
+ return false
+}
+function beginChallengeWindow(actor,card,targetPlayerId,targetHeroId){
+ state.roll={id:'roll-'+uid(),kind:'play',stage:'challengeWindow',actorId:actor.id,cardId:card.id,card:fxCardSnapshot(card),targetPlayerId:targetPlayerId||null,targetHeroId:targetHeroId||null,challengerId:null,modifiers:[],passed:[],deadline:Date.now()+5000};
+ log(`⚔️ ${actor.name} tente de jouer ${card.name} — fenêtre de Défi.`);
+ // Les bots prennent leur décision immédiatement mais les humains gardent leur fenêtre de réaction.
+ for(const b of state.players.filter(x=>x.id!==actor.id&&x.bot)){
+   const ci=b.hand.findIndex(x=>x.type==='challenge');
+   if(ci>=0&&Math.random()<.22){beginCardChallenge(b.id,b.hand[ci].id);return}
+   state.roll.passed.push(b.id)
+ }
+}
+function resolveUnchallengedPlay(){
+ const r=state&&state.roll;if(!r||r.stage!=='challengeWindow')return;
+ const actor=state.players.find(x=>x.id===r.actorId),card=actor&&actor.hand.find(x=>x.id===r.cardId),tp=r.targetPlayerId,th=r.targetHeroId;
+ state.roll=null;if(actor&&card){log(`✅ Aucun Défi : ${card.name} est joué.`);resolveCardPlay(actor,card,tp,th)}
+}
+function beginCardChallenge(challengerId,challengeCardId){
+ const r=state&&state.roll;if(!r||r.stage!=='challengeWindow'||challengerId===r.actorId)return false;
+ const ch=state.players.find(x=>x.id===challengerId);if(!ch)return false;const i=ch.hand.findIndex(x=>x.id===challengeCardId&&x.type==='challenge');if(i<0)return false;
+ const [cc]=ch.hand.splice(i,1);state.discard.push(cc);r.kind='challenge';r.stage='awaitRoll';r.challengerId=challengerId;r.currentRollerId=r.actorId;r.rolls={};r.modifiers=[];r.passed=[];delete r.deadline;
+ const actor=state.players.find(x=>x.id===r.actorId);log(`⚔️ ${ch.name} DÉFIE ${actor?.name||'le joueur'} sur ${r.card?.name||'la carte'} !`);return true
 }
 function findItemTarget(p,c,targetPlayerId,targetHeroId){if(!targetHeroId)return null;const pl=state.players.find(x=>x.id===targetPlayerId);if(!pl)return null;const h=pl.team.find(x=>x.id===targetHeroId&&!x.item);if(!h)return null;if(c.type==='cursed'&&pl.id===p.id)return null;if(c.type==='item'&&pl.id!==p.id)return null;return {player:pl,hero:h}}
 
@@ -1367,16 +1414,129 @@ function resolvePendingChoice(pid,a){
  }
 }
 function roll2(){return 2+Math.floor(Math.random()*6)+Math.floor(Math.random()*6)}
-function consumeBotModifiers(owner,total,positive=true){const me=state.players.find(x=>x.id===myId);if(isHost&&me){const i=me.hand.findIndex(c=>c.type==='modifier');const helpful=me.id===owner.id;if(i>=0&&confirm(`🎛️ Jet actuel : ${total}. Jouer ${me.hand[i].name} ${helpful?'pour t’aider':'contre '+owner.name} ?`)){const c=me.hand.splice(i,1)[0];state.discard.push(c);let v=c.mode==='choice'?(helpful?1:-3):c.value;if(!helpful&&v>0)v=-Math.abs(v);total+=v;log(`🎛️ ${me.name} joue ${c.name} (${v>0?'+':''}${v}).`)}}for(const b of state.players){const want=b.id===owner.id?positive:!positive;if(!b.bot||!want)continue;const i=b.hand.findIndex(c=>c.type==='modifier'&&Math.random()<.18);if(i>=0){const c=b.hand.splice(i,1)[0];state.discard.push(c);let v=c.mode==='choice'?(b.id===owner.id?1:-3):c.value;if(b.id!==owner.id&&v>0)v=-Math.abs(v);total+=v;log(`🎛️ ${b.name} joue ${c.name} (${v>0?'+':''}${v}).`)}}return total}
-function useHero(p,id,free){const h=p.team.find(x=>x.id===id);if(!h)return;if(state.usedHeroes.includes(h.id))return free?null:notify(p.id,'Ce Héros a déjà tenté son pouvoir ce tour.');if(!free){if(state.actions<1)return;state.actions--}state.usedHeroes.push(h.id);const d1=1+Math.floor(Math.random()*6),d2=1+Math.floor(Math.random()*6);let total=d1+d2+itemBonus(h)+monsterSkillCount(p,'heroPlus1')+(state.boosts['hero-'+p.id]||0);state.boosts['hero-'+p.id]=0;total=consumeBotModifiers(p,total,true);const success=total>=h.threshold;emitFx('heroPower',{playerId:p.id,heroId:h.id,success,total,free:!!free});log(`${free?'🆓 ':''}${p.name} tente le pouvoir de ${h.name} : ${total}.`);showDice(pidSafe(p.id),d1,d2,total,h.name+(free?' • effet gratuit':''));if(success){log(`✅ Pouvoir réussi.`);heroEffect(p,h,total)}else log(`❌ Pouvoir raté.`)}
+function beginHeroRoll(p,h,free=false){
+ const staticBonus=itemBonus(h)+monsterSkillCount(p,'heroPlus1')+(state.boosts['hero-'+p.id]||0);state.boosts['hero-'+p.id]=0;
+ state.roll={id:'roll-'+uid(),kind:'hero',stage:'awaitRoll',rollerId:p.id,currentRollerId:p.id,heroId:h.id,title:h.name,threshold:h.threshold,staticBonus,free:!!free,modifiers:[],passed:[]};
+ log(`🎲 ${p.name} prépare le jet de pouvoir de ${h.name}${free?' (gratuit)':''}.`)
+}
+function useHero(p,id,free){const h=p.team.find(x=>x.id===id);if(!h)return;if(state.usedHeroes.includes(h.id))return free?null:notify(p.id,'Ce Héros a déjà tenté son pouvoir ce tour.');if(!free){if(state.actions<1)return;state.actions--}state.usedHeroes.push(h.id);beginHeroRoll(p,h,free)}
 function heroEffect(p,h,total){switch(h.effect){case'attackBoost':state.boosts[p.id]=(state.boosts[p.id]||0)+3;break;case'destroyHero':requestHeroChoice(p,'destroy',1,'Choisis un Héros adverse à DÉTRUIRE.');break;case'draw2discard1':draw(p,2);requestDiscard(p.id,1);break;case'draw2':draw(p,2);break;case'stealHero':requestHeroChoice(p,'steal',1,'Choisis un Héros adverse à VOLER.');break;case'oppDiscard':requestOpponentDiscard(p,1);break;case'recoverItem':requestRecover(p,['item','cursed'],'Choisis un Objet à récupérer.');break;case'draw1':draw(p,1);break;case'recoverHero':requestRecover(p,['hero'],'Choisis un Héros à récupérer.');break;case'drawHeroBoost':draw(p,1);state.boosts['hero-'+p.id]=(state.boosts['hero-'+p.id]||0)+1;break;case'allDiscard':requestDiscardQueue(state.players.filter(x=>x.id!==p.id).map(x=>x.id),1,'Chaque adversaire défausse 1 carte.');break;case'sacDestroy2':requestHeroChoice(p,'sacrifice',1,'Choisis le Héros à SACRIFIER.',{after:{type:'destroyAfterSac',actorId:p.id}});break}}
 function applyEffect(p,e){if(e==='draw3discard1'){draw(p,3);requestDiscard(p.id,1)}if(e==='destroyItem')requestHeroChoice(p,'destroyItem',1,'Choisis l’Objet équipé à DÉTRUIRE.');if(e==='oppDiscard2')requestOpponentDiscard(p,2);if(e==='recoverHero')requestRecover(p,['hero'],'Choisis un Héros à récupérer.');if(e==='swapHero')requestHeroChoice(p,'swapOwn',1,'Choisis ton Héros à échanger.')}
 function moveHeroToDiscard(p,h){p.team=p.team.filter(x=>x.id!==h.id);state.discard.push(h);if(h.item){state.discard.push(h.item);delete h.item}}
 function meetsRequirement(p,m){const team=p.team||[];if(m.req.heroes&&team.length<m.req.heroes)return false;if(m.req.classes&&!m.req.classes.every(c=>partyClasses(p).has(c)))return false;return true}
 function applyMonsterPenalty(p,m){if(m.penalty==='sacHero')requestHeroChoice(p,'sacrifice',1,'Choisis le Héros à SACRIFIER.');if(m.penalty==='discard2')requestDiscard(p.id,2)}
-function attackMonster(p,id){const m=state.monsters.find(x=>x.id===id);if(!m)return;if(state.actions<2)return notify(p.id,'Il faut 2 actions pour attaquer un Fléau.');if(!meetsRequirement(p,m))return notify(p.id,`Condition requise : ${m.reqText}`);state.actions-=2;const d1=1+Math.floor(Math.random()*6),d2=1+Math.floor(Math.random()*6);let total=d1+d2+(state.boosts[p.id]||0)+monsterSkillCount(p,'attackPlus1');state.boosts[p.id]=0;total=consumeBotModifiers(p,total,true);showDice(pidSafe(p.id),d1,d2,total,m.name);log(`${p.name} attaque ${m.name} : ${total}.`);if(total>=m.success){emitFx('monsterSlain',{playerId:p.id,monsterId:m.id,card:{...m},total});p.slain.push({...m});state.monsters=state.monsters.filter(x=>x.id!==id);if(state.monsterDeck.length)state.monsters.push(state.monsterDeck.shift());log(`🏆 ${p.name} terrasse ${m.name} et gagne son pouvoir permanent.`)}else if(total<=m.fail){emitFx('monsterImpact',{playerId:p.id,monsterId:m.id,outcome:'fail',total});log(`💀 ${m.name} riposte : ${m.penaltyText}.`);applyMonsterPenalty(p,m)}else{emitFx('monsterImpact',{playerId:p.id,monsterId:m.id,outcome:'neutral',total});log(`😮 Zone neutre : rien ne se passe.`)}}
+function attackMonster(p,id){
+ const m=state.monsters.find(x=>x.id===id);if(!m)return;if(state.actions<2)return notify(p.id,'Il faut 2 actions pour attaquer un Fléau.');if(!meetsRequirement(p,m))return notify(p.id,`Condition requise : ${m.reqText}`);
+ state.actions-=2;const staticBonus=(state.boosts[p.id]||0)+monsterSkillCount(p,'attackPlus1');state.boosts[p.id]=0;
+ state.roll={id:'roll-'+uid(),kind:'monster',stage:'awaitRoll',rollerId:p.id,currentRollerId:p.id,monsterId:m.id,title:m.name,success:m.success,fail:m.fail,staticBonus,modifiers:[],passed:[]};
+ log(`🎲 ${p.name} se prépare à attaquer ${m.name}.`)
+}
+
+function playerNameById(id){return state?.players?.find(p=>p.id===id)?.name||'Joueur'}
+function modifierValue(card,requested){if(!card||card.type!=='modifier')return null;if(card.mode==='choice')return [1,-3].includes(Number(requested))?Number(requested):null;return Number(card.value)}
+function rollModifierSum(r,targetId){return (r.modifiers||[]).filter(m=>m.targetId===targetId).reduce((n,m)=>n+Number(m.value||0),0)}
+function normalRawTotal(r){return Number(r.d1||0)+Number(r.d2||0)+Number(r.staticBonus||0)}
+function challengeRawTotal(r,pid){const rr=r.rolls&&r.rolls[pid];return rr?Number(rr.d1||0)+Number(rr.d2||0):null}
+function totalForRollTarget(r,pid){if(r.kind==='challenge')return (challengeRawTotal(r,pid)||0)+rollModifierSum(r,pid);return normalRawTotal(r)+rollModifierSum(r,r.rollerId)}
+function rollEligiblePassers(r){return (state.players||[]).filter(p=>!p.bot).map(p=>p.id)}
+function challengeEligiblePassers(r){return (state.players||[]).filter(p=>p.id!==r.actorId&&!p.bot).map(p=>p.id)}
+function allPassed(ids,passed){return ids.length>0&&ids.every(id=>(passed||[]).includes(id))}
+function performSyncedRoll(pid){
+ const r=state&&state.roll;if(!r||r.stage!=='awaitRoll'||r.currentRollerId!==pid)return false;
+ const d1=1+Math.floor(Math.random()*6),d2=1+Math.floor(Math.random()*6);
+ if(r.kind==='challenge'){if(!r.rolls)r.rolls={};r.rolls[pid]={d1,d2};}else{r.d1=d1;r.d2=d2}
+ r.rollingPlayerId=pid;r.stage='rolling';r.revealAt=Date.now()+900;log(`🎲 ${playerNameById(pid)} lance les dés…`);return true
+}
+function advanceAfterRollAnimation(){
+ const r=state&&state.roll;if(!r||r.stage!=='rolling')return false;
+ if(r.kind==='challenge'){
+   const other=r.currentRollerId===r.actorId?r.challengerId:null;
+   if(other&&!r.rolls?.[other]){r.stage='awaitRoll';r.currentRollerId=other;delete r.revealAt;delete r.rollingPlayerId;return true}
+ }
+ startReactionPhase(r);return true
+}
+function autoBotReactions(r){
+ for(const b of state.players.filter(p=>p.bot)){
+   const mods=b.hand.filter(c=>c.type==='modifier');
+   if(!mods.length){if(!r.passed.includes(b.id))r.passed.push(b.id);continue}
+   if(Math.random()<.2){const card=mods[0];let target=r.kind==='challenge'?(Math.random()<.5?r.actorId:r.challengerId):r.rollerId;let value=card.mode==='choice'?(target===b.id?1:-3):Number(card.value);const i=b.hand.findIndex(c=>c.id===card.id);if(i>=0){b.hand.splice(i,1);state.discard.push(card);r.modifiers.push({playerId:b.id,playerName:b.name,cardId:card.id,cardName:card.name,value,targetId:target});log(`🎛️ ${b.name} joue ${card.name} (${value>0?'+':''}${value}) sur ${playerNameById(target)}.`)}}
+   if(!r.passed.includes(b.id))r.passed.push(b.id)
+ }
+}
+function startReactionPhase(r){
+ r.stage='reactions';r.currentRollerId=null;r.passed=[];r.deadline=Date.now()+10000;delete r.revealAt;delete r.rollingPlayerId;
+ if(r.kind==='challenge')log(`🎲 Défi : ${playerNameById(r.actorId)} fait ${challengeRawTotal(r,r.actorId)}, ${playerNameById(r.challengerId)} fait ${challengeRawTotal(r,r.challengerId)}. Modificateurs ?`);
+ else log(`🎲 ${playerNameById(r.rollerId)} obtient ${normalRawTotal(r)}${r.staticBonus?` (bonus inclus : ${r.staticBonus>0?'+':''}${r.staticBonus})`:''}. Modificateurs ?`);
+ autoBotReactions(r)
+}
+function playRollModifier(pid,a){
+ const r=state&&state.roll;if(!r||r.stage!=='reactions')return false;const p=state.players.find(x=>x.id===pid);if(!p)return false;
+ const i=p.hand.findIndex(c=>c.id===a.cardId&&c.type==='modifier');if(i<0)return notify(pid,'Ce Modificateur n’est plus dans ta main.'),true;const c=p.hand[i],value=modifierValue(c,a.value);if(value===null||!Number.isFinite(value))return notify(pid,'Valeur de Modificateur invalide.'),true;
+ let targetId=r.kind==='challenge'?a.targetId:r.rollerId;if(r.kind==='challenge'&&![r.actorId,r.challengerId].includes(targetId))return notify(pid,'Choisis l’un des deux jets du Défi.'),true;
+ p.hand.splice(i,1);state.discard.push(c);r.modifiers.push({playerId:p.id,playerName:p.name,cardId:c.id,cardName:c.name,value,targetId});r.passed=[];r.deadline=Date.now()+10000;log(`🎛️ ${p.name} joue ${c.name} (${value>0?'+':''}${value})${r.kind==='challenge'?' sur '+playerNameById(targetId):''}.`);autoBotReactions(r);return true
+}
+function finishReactionPhase(){
+ const r=state&&state.roll;if(!r||r.stage!=='reactions')return false;r.stage='final';r.finalAt=Date.now()+1350;delete r.deadline;
+ if(r.kind==='challenge'){
+   r.actorTotal=totalForRollTarget(r,r.actorId);r.challengerTotal=totalForRollTarget(r,r.challengerId);r.challengerWins=r.challengerTotal>=r.actorTotal;r.outcomeText=r.challengerWins?`${playerNameById(r.challengerId)} remporte le Défi`:`${playerNameById(r.actorId)} résiste au Défi`;
+ }else if(r.kind==='hero'){
+   r.finalTotal=totalForRollTarget(r,r.rollerId);r.success=!!(r.finalTotal>=r.threshold);r.outcomeText=r.success?'POUVOIR RÉUSSI':'POUVOIR RATÉ';
+ }else if(r.kind==='monster'){
+   r.finalTotal=totalForRollTarget(r,r.rollerId);r.outcome=r.finalTotal>=r.success?'slain':r.finalTotal<=r.fail?'fail':'neutral';r.outcomeText=r.outcome==='slain'?'FLÉAU VAINCU !':r.outcome==='fail'?'RIPOSTE DU FLÉAU':'ZONE NEUTRE';
+ }
+ return true
+}
+function resolveFinalRoll(){
+ const r=state&&state.roll;if(!r||r.stage!=='final')return false;
+ if(r.kind==='challenge'){
+   const actor=state.players.find(x=>x.id===r.actorId),card=actor&&actor.hand.find(x=>x.id===r.cardId),tp=r.targetPlayerId,th=r.targetHeroId;
+   if(r.challengerWins){if(actor&&card){const i=actor.hand.findIndex(x=>x.id===card.id);if(i>=0)actor.hand.splice(i,1);state.discard.push(card);emitFx('discard',{playerId:actor.id,cardId:card.id,card:fxCardSnapshot(card)});log(`❌ ${playerNameById(r.challengerId)} gagne ${r.challengerTotal} à ${r.actorTotal} : ${card.name} est annulée.`)}}
+   else{log(`✅ ${playerNameById(r.actorId)} gagne ${r.actorTotal} à ${r.challengerTotal} : la carte passe.`);state.roll=null;if(actor&&card)resolveCardPlay(actor,card,tp,th);return true}
+   state.roll=null;return true
+ }
+ if(r.kind==='hero'){
+   const p=state.players.find(x=>x.id===r.rollerId),h=p&&p.team.find(x=>x.id===r.heroId),total=r.finalTotal;state.roll=null;if(!p||!h)return true;emitFx('heroPower',{playerId:p.id,heroId:h.id,success:r.success,total,free:!!r.free});log(`${r.free?'🆓 ':''}${p.name} termine le jet de ${h.name} : ${total}.`);if(r.success){log('✅ Pouvoir réussi.');heroEffect(p,h,total)}else log('❌ Pouvoir raté.');return true
+ }
+ if(r.kind==='monster'){
+   const p=state.players.find(x=>x.id===r.rollerId),m=state.monsters.find(x=>x.id===r.monsterId),total=r.finalTotal;state.roll=null;if(!p||!m)return true;log(`${p.name} attaque ${m.name} : ${total}.`);if(r.outcome==='slain'){emitFx('monsterSlain',{playerId:p.id,monsterId:m.id,card:{...m},total});p.slain.push({...m});state.monsters=state.monsters.filter(x=>x.id!==m.id);if(state.monsterDeck.length)state.monsters.push(state.monsterDeck.shift());log(`🏆 ${p.name} terrasse ${m.name} et gagne son pouvoir permanent.`)}else if(r.outcome==='fail'){emitFx('monsterImpact',{playerId:p.id,monsterId:m.id,outcome:'fail',total});log(`💀 ${m.name} riposte : ${m.penaltyText}.`);applyMonsterPenalty(p,m)}else{emitFx('monsterImpact',{playerId:p.id,monsterId:m.id,outcome:'neutral',total});log('😮 Zone neutre : rien ne se passe.')}return true
+ }
+ state.roll=null;return true
+}
+function handleRollAction(pid,a){
+ const r=state&&state.roll;if(!r||!a)return false;
+ if(a.type==='rollDice')return performSyncedRoll(pid);
+ if(r.stage==='challengeWindow'&&a.type==='challengeCard')return beginCardChallenge(pid,a.cardId);
+ if(r.stage==='challengeWindow'&&a.type==='passChallenge'){
+   if(pid===r.actorId)return true;if(!r.passed.includes(pid))r.passed.push(pid);if(allPassed(challengeEligiblePassers(r),r.passed))resolveUnchallengedPlay();return true
+ }
+ if(r.stage==='reactions'&&a.type==='playModifier')return playRollModifier(pid,a);
+ if(r.stage==='reactions'&&a.type==='passReaction'){
+   if(!r.passed.includes(pid))r.passed.push(pid);if(allPassed(rollEligiblePassers(r),r.passed))finishReactionPhase();return true
+ }
+ return false
+}
+function hostFlowTick(){
+ if(!isHost||!state||!state.roll)return;const r=state.roll,now=Date.now();let changed=false;
+ if(r.stage==='challengeWindow'&&r.deadline&&now>=r.deadline){resolveUnchallengedPlay();changed=true}
+ else if(r.stage==='rolling'&&r.revealAt&&now>=r.revealAt){advanceAfterRollAnimation();changed=true}
+ else if(r.stage==='reactions'&&r.deadline&&now>=r.deadline){finishReactionPhase();changed=true}
+ else if(r.stage==='final'&&r.finalAt&&now>=r.finalAt){resolveFinalRoll();changed=true}
+ if(changed){checkWin();broadcast();return}
+ if(r.stage==='awaitRoll'){
+   const pl=state.players.find(p=>p.id===r.currentRollerId);if(pl&&pl.bot){performSyncedRoll(pl.id);checkWin();broadcast()}
+ }
+}
+function scheduleHostFlow(){
+ if(hostFlowTimer){clearTimeout(hostFlowTimer);hostFlowTimer=null}if(!isHost||!state||!state.roll)return;const r=state.roll,now=Date.now();let delay=null;
+ if(r.stage==='challengeWindow'&&r.deadline)delay=Math.max(20,r.deadline-now);
+ else if(r.stage==='rolling'&&r.revealAt)delay=Math.max(20,r.revealAt-now);
+ else if(r.stage==='reactions'&&r.deadline)delay=Math.max(20,r.deadline-now);
+ else if(r.stage==='final'&&r.finalAt)delay=Math.max(20,r.finalAt-now);
+ else if(r.stage==='awaitRoll'&&state.players.find(p=>p.id===r.currentRollerId)?.bot)delay=650;
+ if(delay!==null)hostFlowTimer=setTimeout(()=>{hostFlowTimer=null;hostFlowTick()},delay)
+}
 function nextTurn(){state.turn=(state.turn+1)%state.players.length;state.actions=3;state.usedHeroes=[];active().itemDrawUsed=false;log(`➡️ Tour de ${active().name}.`);broadcast()}
-function maybeBotTurn(){if(!isHost||!state||!state.started||state.winner||state.pendingChoice||botThinking)return;const p=active();if(!p||!p.bot)return;botThinking=true;setTimeout(()=>{botThinking=false;if(state.started&&!state.winner&&active().id===p.id)botStep(p)},500)}
+function maybeBotTurn(){if(!isHost||!state||!state.started||state.winner||state.pendingChoice||state.roll||botThinking)return;const p=active();if(!p||!p.bot)return;botThinking=true;setTimeout(()=>{botThinking=false;if(state.started&&!state.winner&&active().id===p.id)botStep(p)},500)}
 function botStep(p){if(active().id!==p.id)return;if(state.actions<=0){processAction(p.id,{type:'endTurn'});return}const hero=p.hand.find(c=>c.type==='hero'&&!partyClasses(p).has(c.class))||p.hand.find(c=>c.type==='hero');const magic=p.hand.find(c=>c.type==='magic');const item=p.hand.find(c=>c.type==='item'&&p.team.some(h=>!h.item));const cursed=p.hand.find(c=>c.type==='cursed'&&state.players.some(x=>x.id!==p.id&&x.team.some(h=>!h.item)));const usable=p.team.find(h=>!state.usedHeroes.includes(h.id));const target=state.monsters.find(m=>meetsRequirement(p,m));let a;if(state.actions>=2&&target&&Math.random()<.35)a={type:'attack',monsterId:target.id};else if(hero)a={type:'playCard',cardId:hero.id};else if(usable&&Math.random()<.5)a={type:'useHero',cardId:usable.id};else if(item)a={type:'playCard',cardId:item.id};else if(cursed)a={type:'playCard',cardId:cursed.id};else if(magic)a={type:'playCard',cardId:magic.id};else if(state.actions===3&&p.hand.length>=8)a={type:'discardHand'};else a={type:'draw'};processAction(p.id,a)}
 function declareWinner(p){state.winner=p.id;state.started=false;log(`👑 ${p.name} REMPORTE LA PARTIE !`);if(p.id===myId)setTimeout(()=>alert('Victoire ! 👑'),100);return true}
 function checkWin(){for(const p of state.players){if(p.slain.length>=3)return declareWinner(p)}return false}
@@ -1661,7 +1821,50 @@ function artFor(o,kind='card'){
 }
 function artDiv(o,kind='card',cls='hsArt'){return `<div class="${cls}" style="background-image:url('${artFor(o,kind)}')"></div>`}
 
-function render(){if(!state)return;const fresh=collectFx(),captured=captureFx(fresh);renderPlayers();if(state.started||state.winner)renderGame();if(captured.length)requestAnimationFrame(()=>requestAnimationFrame(()=>playFxBatch(captured)))}
+
+let rollGesture=null,diceFaceTimer=null;
+function stopDiceFaceAnimation(){if(diceFaceTimer){clearInterval(diceFaceTimer);diceFaceTimer=null}}
+function syncDiceFaceAnimation(){
+ stopDiceFaceAnimation();const r=state&&state.roll;if(!r||r.stage!=='rolling')return;
+ const tick=()=>{document.querySelectorAll('#rollPanel .syncDie.rolling').forEach((el,i)=>{const n=1+Math.floor(Math.random()*6);el.textContent=diceFaces[n-1];el.style.transform=`translate(${(Math.random()-.5)*8}px,${(Math.random()-.5)*7}px) rotate(${(Math.random()-.5)*28}deg)`})};
+ tick();diceFaceTimer=setInterval(tick,85)
+}
+function rollCanMyTap(){const r=state&&state.roll;return !!(r&&r.stage==='awaitRoll'&&r.currentRollerId===myId)}
+function rollPadDown(e){if(!rollCanMyTap()||e.target.closest('button'))return;rollGesture={x:e.clientX,y:e.clientY,t:Date.now(),id:e.pointerId};try{e.currentTarget.setPointerCapture(e.pointerId)}catch(_){}}
+function rollPadUp(e){if(!rollGesture||!rollCanMyTap()||e.target.closest('button')){rollGesture=null;return}const g=rollGesture;rollGesture=null;const d=Math.hypot(e.clientX-g.x,e.clientY-g.y),dt=Date.now()-g.t;if(d>=28||dt<650)sendAction({type:'rollDice',rollId:state.roll.id})}
+function rollNow(){if(rollCanMyTap()){try{navigator.vibrate?.(35)}catch(_){};sendAction({type:'rollDice',rollId:state.roll.id})}}
+function modifierOptions(c){return c.mode==='choice'?[1,-3]:[Number(c.value)]}
+function reactionButtonsForCard(c,r){
+ const opts=modifierOptions(c),passed=(r.passed||[]).includes(myId);if(r.kind!=='challenge')return opts.map(v=>`<button class="${v>=0?'good':'danger'}" ${passed?'disabled':''} onclick="sendAction({type:'playModifier',cardId:'${c.id}',value:${v}})">${v>=0?'+':''}${v}</button>`).join('');
+ return opts.map(v=>[r.actorId,r.challengerId].map(t=>`<button class="${v>=0?'good':'danger'}" ${passed?'disabled':''} onclick="sendAction({type:'playModifier',cardId:'${c.id}',value:${v},targetId:'${t}'})">${playerNameById(t)} ${v>=0?'+':''}${v}</button>`).join('')).join('')
+}
+function reactionCardsMarkup(r){const p=state.players.find(x=>x.id===myId),mods=(p?.hand||[]).filter(c=>c.type==='modifier');if(!mods.length)return '<div class="rollWatching">Aucun Modificateur dans ta main.</div>';return `<div class="reactionCards">${mods.map(c=>`<div class="reactionCard"><strong>${esc(c.name)}</strong><small>${esc(c.desc||'Modifie le jet.')}</small><div class="reactionActions">${reactionButtonsForCard(c,r)}</div></div>`).join('')}</div>`}
+function reactionLogMarkup(r){if(!(r.modifiers||[]).length)return '<span class="reactionChip">Aucun Modificateur joué pour le moment</span>';return (r.modifiers||[]).map(m=>`<span class="reactionChip ${m.value>=0?'plus':'minus'}">${esc(m.playerName||playerNameById(m.playerId))} • ${esc(m.cardName)} ${m.value>=0?'+':''}${m.value}${r.kind==='challenge'?' → '+esc(playerNameById(m.targetId)):''}</span>`).join('')}
+function challengeWindowMarkup(r){
+ const actor=state.players.find(x=>x.id===r.actorId),mine=state.players.find(x=>x.id===myId),chs=(mine?.hand||[]).filter(c=>c.type==='challenge'),canChallenge=myId!==r.actorId&&!mine?.bot,passed=(r.passed||[]).includes(myId),art=r.card?artFor(r.card,r.card.type==='hero'?'hero':'card'):'';
+ const buttons=canChallenge?`${chs.map(c=>`<button class="danger" ${passed?'disabled':''} onclick="sendAction({type:'challengeCard',cardId:'${c.id}'})">⚔ DÉFIER • ${esc(c.name)}</button>`).join('')}${!passed?'<button class="secondary" onclick="sendAction({type:\'passChallenge\'})">JE PASSE</button>':'<button class="secondary" disabled>PASSÉ ✓</button>'}`:'<span class="rollWatching">Les autres joueurs peuvent jouer un Défi.</span>';
+ return `<div class="rollEyebrow">FENÊTRE DE RÉACTION</div><div class="rollTitle">${esc(actor?.name||'Un joueur')} veut jouer une carte</div><div class="rollSubtitle">Une carte ne peut être défiée qu’une seule fois.</div><div class="challengeCardView"><div class="challengeCardArt" style="background-image:url('${art}')"></div><div><h3>${esc(r.card?.name||'Carte')}</h3><p>${esc(r.card?.desc||'')}</p><div class="challengeActions">${buttons}</div></div></div><div class="rollFooter"><span id="rollCountdown" class="rollCountdown"></span></div>`
+}
+function rollSideMarkup(r,pid,label){const hidden=r.stage==='rolling'&&r.rollingPlayerId===pid,rr=hidden?null:r.rolls?.[pid],total=rr?totalForRollTarget(r,pid):null,raw=rr?challengeRawTotal(r,pid):null;return `<div class="rollSide ${r.currentRollerId===pid?'active':''}"><b>${esc(playerNameById(pid))}</b><small>${label}</small><div class="rollSideTotal">${hidden?'…':rr?total:'—'}</div><div class="rawCalc">${hidden?'Les dés roulent…':rr?`${diceFaces[rr.d1-1]} ${diceFaces[rr.d2-1]} = ${raw}${rollModifierSum(r,pid)?` • mods ${rollModifierSum(r,pid)>0?'+':''}${rollModifierSum(r,pid)}`:''}`:'À lancer'}</div></div>`}
+function normalRollSummary(r){const hidden=r.stage==='rolling',raw=!hidden&&(r.d1&&r.d2)?normalRawTotal(r):null,mods=rollModifierSum(r,r.rollerId),total=raw===null?null:raw+mods;return `<div class="rollSides" style="grid-template-columns:1fr"><div class="rollSide active"><b>${esc(playerNameById(r.rollerId))}</b><small>${r.kind==='hero'?'Jet de pouvoir':'Attaque de Fléau'}</small><div class="rollSideTotal">${hidden?'…':total??'—'}</div><div class="rawCalc">${hidden?'Les dés roulent…':raw!==null?`${diceFaces[r.d1-1]} ${diceFaces[r.d2-1]}${r.staticBonus?` • bonus ${r.staticBonus>0?'+':''}${r.staticBonus}`:''}${mods?` • mods ${mods>0?'+':''}${mods}`:''}`:'À lancer'}</div></div></div>`}
+function dicePadMarkup(r){const mine=r.currentRollerId===myId,rolling=r.stage==='rolling',rr=r.kind==='challenge'?r.rolls?.[r.rollingPlayerId||r.currentRollerId]:r,d1=rr?.d1,d2=rr?.d2;return `<div class="dicePad ${mine&&r.stage==='awaitRoll'?'canRoll':''}" onpointerdown="rollPadDown(event)" onpointerup="rollPadUp(event)"><div class="dicePair"><div class="syncDie ${rolling?'rolling':''}">${rolling?'🎲':d1?diceFaces[d1-1]:'🎲'}</div><div class="syncDie ${rolling?'rolling':''}">${rolling?'🎲':d2?diceFaces[d2-1]:'🎲'}</div></div><div class="rollPrompt">${rolling?'Les dés roulent…':mine&&r.stage==='awaitRoll'?'<strong>À TOI !</strong> Touche ou balaie la zone pour lancer':`${esc(playerNameById(r.currentRollerId))} doit lancer les dés`}</div>${mine&&r.stage==='awaitRoll'?'<div class="swipeHint">tap • balayage horizontal ou vertical</div><button class="primary rollMainButton" onclick="event.stopPropagation();rollNow()">🎲 LANCER LES DÉS</button>':'<span class="rollWatching">Tous les joueurs assistent au lancer</span>'}</div>`}
+function reactionMarkup(r){const passed=(r.passed||[]).includes(myId);return `<div class="reactionBox"><div class="reactionHead"><b>⚡ Modificateurs</b><span>Le résultat n’est pas résolu tant que la fenêtre est ouverte.</span></div>${reactionCardsMarkup(r)}<div class="reactionLog">${reactionLogMarkup(r)}</div><div class="rollFooter"><button class="secondary" ${passed?'disabled':''} onclick="sendAction({type:'passReaction'})">${passed?'J’AI FINI ✓':'J’AI FINI / JE PASSE'}</button><span id="rollCountdown" class="rollCountdown"></span></div></div>`}
+function finalMarkup(r){
+ if(r.kind==='challenge')return `<div class="rollSides">${rollSideMarkup(r,r.actorId,'Carte jouée')}${rollSideMarkup(r,r.challengerId,'Challenger')}</div><div class="finalResult">${r.actorTotal} — ${r.challengerTotal}</div><div class="finalOutcome ${r.challengerWins?'bad':'good'}">${esc(r.outcomeText||'')}</div>`;
+ const cls=r.kind==='hero'?(r.success?'good':'bad'):(r.outcome==='slain'?'good':r.outcome==='fail'?'bad':'neutral');return `${normalRollSummary(r)}<div class="finalResult">${r.finalTotal}</div><div class="finalOutcome ${cls}">${esc(r.outcomeText||'')}</div>`
+}
+function renderRollOverlay(){
+ const box=document.getElementById('rollOverlay'),panel=document.getElementById('rollPanel');if(!box||!panel)return;const r=state&&state.roll;if(!r){stopDiceFaceAnimation();box.classList.add('hidden');panel.innerHTML='';return}hideOpponentCardPreview(true);opponentPreviewLocked=false;box.classList.remove('hidden');
+ if(r.stage==='challengeWindow'){panel.innerHTML=challengeWindowMarkup(r);updateRollCountdown();return}
+ const title=r.kind==='challenge'?`DÉFI • ${playerNameById(r.challengerId)} contre ${playerNameById(r.actorId)}`:r.kind==='hero'?`${playerNameById(r.rollerId)} • ${r.title}`:`${playerNameById(r.rollerId)} attaque ${r.title}`;
+ const sub=r.kind==='challenge'?`Les deux joueurs lancent 2 dés. Égalité : le challenger gagne.`:r.kind==='hero'?`Objectif : ${r.threshold}+`:`${r.success}+ vainc • ${r.fail}− déclenche la riposte`;
+ const summary=r.kind==='challenge'?`<div class="rollSides">${rollSideMarkup(r,r.actorId,'Carte jouée')}${rollSideMarkup(r,r.challengerId,'Challenger')}</div>`:normalRollSummary(r);
+ let body='';if(r.stage==='awaitRoll'||r.stage==='rolling')body=`${summary}<div class="rollStage">${dicePadMarkup(r)}</div>`;else if(r.stage==='reactions')body=`${summary}${reactionMarkup(r)}`;else if(r.stage==='final')body=finalMarkup(r);
+ panel.innerHTML=`<div class="rollEyebrow">${r.kind==='challenge'?'DUEL DE DÉS':'LANCER SYNCHRONISÉ'}</div><div class="rollTitle">${esc(title)}</div><div class="rollSubtitle">${esc(sub)}</div>${body}`;updateRollCountdown();syncDiceFaceAnimation()
+}
+function updateRollCountdown(){const e=document.getElementById('rollCountdown'),r=state&&state.roll;if(!e||!r)return;const end=r.deadline||r.finalAt;if(!end){e.textContent='';return}const left=Math.max(0,end-Date.now());e.textContent=r.stage==='final'?'Résolution…':`Encore ${(left/1000).toFixed(1)} s`}
+setInterval(updateRollCountdown,200);
+function render(){if(!state)return;const fresh=collectFx(),captured=captureFx(fresh);renderPlayers();if(state.started||state.winner)renderGame();renderRollOverlay();if(captured.length)requestAnimationFrame(()=>requestAnimationFrame(()=>playFxBatch(captured)))}
 let selectedCardId=null;
 function equippedItemMarkup(h){if(!h||!h.item)return'';const it=h.item,cls=it.type==='cursed'?' cursed':'';return `<span class="equippedItemToken${cls}" tabindex="0" aria-label="Objet équipé : ${esc(it.name)}" title="${esc(it.name)} — ${esc(it.desc||'')}"><span>${esc(it.emoji||'◆')}</span><span class="equippedItemTooltip"><b>${esc(it.name)}</b><span>${esc(it.desc||'')}</span></span></span>`}
 function miniHeroMarkup(h,isLeader=false,ownerId=''){
@@ -1681,7 +1884,7 @@ function mobileReaderMarkup(o,{reader='card',artKind='card',typeLabel='',text=''
 }
 function opponentHeroByKey(ownerId,heroKey){const pl=state&&state.players.find(x=>x.id===ownerId);if(!pl)return null;return heroKey==='__leader__'?pl.leader:(pl.team||[]).find(h=>h.id===heroKey)}
 function heroMobilePreviewMarkup(h,{own=false}={}){
- const leader=h.cardRole==='leader',typeLabel=leader?`CHEF • ${h.class||''}`:(h.class||'HÉROS'),p=state&&state.players.find(x=>x.id===myId),canUse=own&&!leader&&state.started&&active()&&active().id===myId&&state.actions>0&&!state.usedHeroes.includes(h.id)&&!state.pendingChoice;
+ const leader=h.cardRole==='leader',typeLabel=leader?`CHEF • ${h.class||''}`:(h.class||'HÉROS'),p=state&&state.players.find(x=>x.id===myId),canUse=own&&!leader&&state.started&&active()&&active().id===myId&&state.actions>0&&!state.usedHeroes.includes(h.id)&&!state.pendingChoice&&!state.roll;
  const item=h.item?`<small>🎒 <b>${esc(h.item.name)}</b><br>${esc(h.item.desc||'')}</small>`:'';
  const text=`${esc(h.desc||'Aucun pouvoir.')}${item}`;
  const actions=own&&!leader?previewButton('🎲 UTILISER LE POUVOIR • 1',`useHeroFromPreview('${h.id}')`,!canUse,'secondary'):'';
@@ -1709,7 +1912,7 @@ function scheduleMonsterCardPreview(monsterId,delay=1000){if(opponentPreviewLock
 function toggleMonsterCardPreview(e,monsterId){e.stopPropagation();const box=document.getElementById('opponentCardPreview');if(opponentPreviewLocked&&!box.classList.contains('hidden')){opponentPreviewLocked=false;hideOpponentCardPreview(true)}else showMonsterCardPreview(monsterId,true)}
 function handCardById(id){const p=state&&state.players.find(x=>x.id===myId);return p&&(p.hand||[]).find(c=>c.id===id)}
 function handMobilePreviewMarkup(c){
- const labels={hero:c.class,item:'OBJET',cursed:'OBJET MAUDIT',magic:'MAGIE',modifier:'MODIFICATEUR',challenge:'DÉFI'},reaction=['modifier','challenge'].includes(c.type),mine=state&&state.started&&active()&&active().id===myId,canPlay=!reaction&&mine&&state.actions>0&&!state.pendingChoice;
+ const labels={hero:c.class,item:'OBJET',cursed:'OBJET MAUDIT',magic:'MAGIE',modifier:'MODIFICATEUR',challenge:'DÉFI'},reaction=['modifier','challenge'].includes(c.type),mine=state&&state.started&&active()&&active().id===myId,canPlay=!reaction&&mine&&state.actions>0&&!state.pendingChoice&&!state.roll;
  const reader=c.type==='hero'?'hero':c.type==='cursed'?'cursed':c.type==='magic'?'magic':c.type==='item'?'item':'card';
  const actionLabel=c.type==='hero'?'POSER LE HÉROS • 1':c.type==='item'||c.type==='cursed'?'ÉQUIPER • 1':'JOUER • 1';
  const actions=!reaction?previewButton(actionLabel,`playCardFromPreview('${c.id}')`,!canPlay,c.type==='hero'?'good':'primary'):'';
@@ -1754,19 +1957,19 @@ function cardMarkup(c,mine,index=0,count=1,isNew=false){
  const cost=['modifier','challenge'].includes(c.type)?'⚡':'1',mid=(count-1)/2,delta=index-mid,rot=Math.max(-15,Math.min(15,delta*3.15)),y=Math.abs(delta)*2.6;
  return `<article class="hsCard mobilePreviewTap ${selectedCardId===c.id?'selected':''} ${!mine?'disabled':''} ${isNew?'cardDrawn':''} type-${c.type}" style="--fan-rot:${rot}deg;--fan-y:${y}px" draggable="${mine&&!isPhoneLandscape()?'true':'false'}" data-id="${c.id}" onclick="handleHandCardTap(event,'${c.id}')" ondblclick="if(!isPhoneLandscape())quickPlayCard('${c.id}')" ondragstart="dragCard(event,'${c.id}')" ondragend="endDragCard()"><span class="hsCost">${cost}</span>${artDiv(c,c.type==='hero'?'hero':'card')}<div class="cardType">${esc(labels[c.type]||c.type).toUpperCase()}</div><h3>${esc(c.name)}</h3><p>${esc(c.desc)}</p><button class="playMini ${c.type==='hero'?'good':'primary'}" ${!mine?'disabled':''}>${['modifier','challenge'].includes(c.type)?'RÉACTION':c.type==='hero'?'POSER':'JOUER'}</button></article>`;
 }
-function selectCard(id){const p=state.players.find(x=>x.id===myId),c=p&&p.hand.find(x=>x.id===id);if(!c)return;if(['modifier','challenge'].includes(c.type))return toast('Cette carte se joue en réaction à un jet ou à une pose ⚡');if(!state.started||active().id!==myId||state.actions<=0)return toast('Pas maintenant 😏');selectedCardId=id;renderGame();document.getElementById('selectedName').textContent=c.name;document.getElementById('selectedDesc').textContent=c.desc;document.getElementById('selectedBar').classList.remove('hidden')}
+function selectCard(id){const p=state.players.find(x=>x.id===myId),c=p&&p.hand.find(x=>x.id===id);if(!c)return;if(['modifier','challenge'].includes(c.type))return toast('Cette carte se joue en réaction à un jet ou à une pose ⚡');if(!state.started||active().id!==myId||state.actions<=0||state.roll)return toast('Pas maintenant 😏');selectedCardId=id;renderGame();document.getElementById('selectedName').textContent=c.name;document.getElementById('selectedDesc').textContent=c.desc;document.getElementById('selectedBar').classList.remove('hidden')}
 function clearSelected(){selectedCardId=null;document.getElementById('selectedBar').classList.add('hidden');renderGame()}
 function playSelected(){if(!selectedCardId)return;const id=selectedCardId;selectedCardId=null;endDragCard();sendAction({type:'playCard',cardId:id})}
-function quickPlayCard(id){const p=state.players.find(x=>x.id===myId),c=p&&p.hand.find(x=>x.id===id);if(!c||['modifier','challenge'].includes(c.type)||!state.started||active().id!==myId||state.actions<=0)return;selectedCardId=null;sendAction({type:'playCard',cardId:id})}
+function quickPlayCard(id){const p=state.players.find(x=>x.id===myId),c=p&&p.hand.find(x=>x.id===id);if(!c||['modifier','challenge'].includes(c.type)||!state.started||active().id!==myId||state.actions<=0||state.roll)return;selectedCardId=null;sendAction({type:'playCard',cardId:id})}
 function dragCard(e,id){if(isPhoneLandscape()){if(e)e.preventDefault();return}const p=state.players.find(x=>x.id===myId),c=p&&p.hand.find(x=>x.id===id);if(!c||['modifier','challenge'].includes(c.type)||!state.started||active().id!==myId)return;draggingCardId=id;e.dataTransfer.setData('text/plain',id);e.dataTransfer.effectAllowed='move';document.body.classList.add('dragging-card');document.getElementById('battlefield')?.classList.add('validDrop');requestAnimationFrame(refreshDragTargetClasses)}
 function endDragCard(){draggingCardId=null;document.body.classList.remove('dragging-card','dragging-item-target');document.getElementById('battlefield')?.classList.remove('validDrop');document.querySelectorAll('.drag-valid-target').forEach(x=>x.classList.remove('drag-valid-target'))}
 function dropCard(e){e.preventDefault();endDragCard();if(!state.started||active().id!==myId)return;const id=e.dataTransfer.getData('text/plain')||selectedCardId;if(id){selectedCardId=null;sendAction({type:'playCard',cardId:id})}}
 let renderedSelfTeamIds=new Set(),renderedHandIds=new Set(),renderedMonsterIds=new Set(),renderedSelfSlainIds=new Set();
 function renderGame(){
- const p=state.players.find(x=>x.id===myId);if(!p)return;const mine=state.started&&active()&&active().id===myId;
+ const p=state.players.find(x=>x.id===myId);if(!p)return;const turnMine=state.started&&active()&&active().id===myId,mine=turnMine&&!state.roll&&!state.pendingChoice&&!state.roll;
  document.getElementById('turnBadge').textContent=state.winner?`Victoire : ${state.players.find(x=>x.id===state.winner)?.name||''}`:`Tour : ${active().name}`;
- document.getElementById('deckText').textContent=state.deck.length;document.getElementById('actionsText').textContent=mine?state.actions:0;document.getElementById('myKills').textContent=p.slain.length;
- document.getElementById('drawBtn').disabled=!mine||state.actions<1||!!state.pendingChoice;const rb=document.getElementById('redrawBtn');if(rb)rb.disabled=!mine||state.actions<3||!!state.pendingChoice;document.getElementById('endBtn').disabled=!mine||!!state.pendingChoice;
+ document.getElementById('deckText').textContent=state.deck.length;document.getElementById('actionsText').textContent=turnMine?state.actions:0;document.getElementById('myKills').textContent=p.slain.length;
+ document.getElementById('drawBtn').disabled=!mine||state.actions<1;const rb=document.getElementById('redrawBtn');if(rb)rb.disabled=!mine||state.actions<3;document.getElementById('endBtn').disabled=!mine;
  const oldMon=renderedMonsterIds;
  document.getElementById('monsters').innerHTML=state.monsters.map(m=>`<div class="hsMonsterCard mobilePreviewTap ${oldMon.size&&!oldMon.has(m.id)?'cardEntering':''}" data-monster-id="${esc(m.id)}" tabindex="0" title="${esc(m.name)} — ${esc(m.skillText||'')}" onmouseenter="scheduleMonsterCardPreview('${m.id}')" onmouseleave="hideOpponentCardPreview()" onfocus="scheduleMonsterCardPreview('${m.id}',650)" onblur="hideOpponentCardPreview()" onclick="toggleMonsterCardPreview(event,'${m.id}')"><span class="hsDiff">${m.success}+</span><span class="hsReward">☠ ${m.fail}−</span><div class="cardType">FLÉAU • ${esc(m.reqText)}</div>${artDiv(m,'monster')}<h3>${esc(m.name)}</h3><p><b>${m.success}+ :</b> VAINCU<br><b>${m.fail}− :</b> ${esc(m.penaltyText)}<br><small>🏆 ${esc(m.skillText)}</small></p><button class="danger playMini" ${!mine||state.actions<2||!meetsRequirement(p,m)?'disabled':''} onclick="event.stopPropagation();sendAction({type:'attack',monsterId:'${m.id}'})">⚔ ATTAQUER • 2</button></div>`).join('');
  renderedMonsterIds=new Set(state.monsters.map(m=>m.id));
